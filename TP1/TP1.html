@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+	<meta charset="utf-8">
+	<title>Example Title</title>
+	<meta name="author" content="EMMANUEL PELLEGRIN">
+	<meta name="description" content="TP1 visualisation d'information">
+	<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="">-->
+	<!--<link rel="icon" type="image/x-icon" href=""/>-->
+    <script src="http://d3js.org/d3.v6.min.js"></script>
+</head>
+
+<body>
+    <svg2 width = "500" height = "500"></svg2>
+    <svg width = "500" height = "500"></svg>
+	<script type="text/javascript">
+        var w =  500;
+        var  h=  500;
+        var b = d3.select("body");
+        //var svg =  b.append("svg");
+        //var svg2 = b.append("svg2")
+        //svg.attr ("width",w);
+        //svg.attr("height",h);
+        //svg2.attr ("width",w);
+        //svg2.attr("height",h);
+        
+        
+        function rand(mi,ma) {
+            //https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+            var  valeur = Math.floor(Math.random() * ma) + mi
+            return valeur
+        }
+        
+        d3.json("miserables.json").then(function(graph){
+           
+            var svg = d3.select("svg");
+            console.log("graph : ", graph)
+            for(i=0;i<graph.nodes.length;i++){
+                 //console.log("node id : " , graph.nodes[i].id);
+                var node = svg.append("circle");
+                node.attr("stroke","#aaaaaa");
+                node.attr("r",5);
+                node.attr("id", "node+graph.nodes[i].id");
+                node.attr("cx",rand(1,w));
+                node.attr("cy",rand(1,h));
+                node.attr("class",".node");
+            }
+            var svg2 = d3.select("svg2");
+            var classNodes = svg2.selectAll(".node");
+            var dataNodes =classNodes.data(graph.nodes);
+            var nodes = dataNodes.enter().append("circle");
+            nodes.attr("stroke","#aaccaa");
+            nodes.attr("r",5);
+            nodes.attr("id",function(d){return "node"+d.id});
+            nodes.attr("cx",function(d){ return rand(1,w)});
+            nodes.attr("cy", function(d){ return rand(1,h)});
+            
+            /*
+            
+            exercice 5 : 
+            attention le code pour l'interaction décrit dans le TP est l'ancien
+            
+            */
+            
+        })
+    </script>
+</body>
+
+</html>
