@@ -1,6 +1,6 @@
 TP1 -
 ==
-## exercice 1
+## Exercice 1
 Reprenez l’exemple de la partie 1 et définissez les tâches que les individus du public
 ciblé devront pouvoir accomplir avec votre visualisation, les structures de données que vous allez
 utiliser et les attributs dérivés que vous allez calculer (indice : rappelez-vous de votre enseignement
@@ -30,7 +30,7 @@ ensuite on propose une juxtaposition avec les infos sur la personne
 correction
 
 
-# exercice 3
+## Exercice 3
 Exercice 3 : Normalement, vous avez déjà vu en cours d’analyse de réseaux les algorithmes
 permettant de calculer les clusters et la centralité. Il reste donc à trouver celui permettant de
 calculer le positionnement des sommets. Récupérez le fichier graphVisTechniques.pdf, il contient
@@ -42,7 +42,7 @@ Algo de force
 
 
 
-#Exercice 4
+## Exercice 4
 Exercice 4 : Pour les étapes de conception 2 à 4, identifiez les risques et proposez, si vous en trouvez,
 des moyens pour vous en prémunir.
 
@@ -72,7 +72,7 @@ précautions:
 
 
 
-# Exercice 5
+## Exercice 5
 Exercice 5 : Dans l’exercice 3, vous avez identifié un algorithme intéressant pour placer les sommets
 de votre graphe. Comment allez-vous l’évaluer ?
 
