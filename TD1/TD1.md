@@ -72,7 +72,7 @@ précautions:
 
 
 
-# exercice 5
+# Exercice 5
 Exercice 5 : Dans l’exercice 3, vous avez identifié un algorithme intéressant pour placer les sommets
 de votre graphe. Comment allez-vous l’évaluer ?
 
