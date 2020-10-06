@@ -27,5 +27,37 @@ lattice::xyplot(price ~ carat, data = diamonds)
 # avec ggpplot
 library(ggplot2)
 
-ggplot2::ggplot(data = diamonds,aes(x=carat,y=price))+ geom_point()+geom_smooth(data = diamonds, method = "loess", formula = "y~x")
+ggplot2::ggplot(data = diamonds,aes(x=carat,y=price))+ geom_point()+geom_smooth()
+
+
+
+
+gg<- ggplot(diamonds, aes(x=carat,y=price, color=cut))+geom_point()
+
+gg
+
+economics
+?economics
+#exercice1.1
+ggplot2::ggplot(data = economics,aes(x = date,y = pce))+geom_line()
+#exercice 1.2
+p_1 <- ggplot2::ggplot(data = economics,aes(x = date,y = pce))+geom_line(color = "dodger blue", size = 1)
+p_1
+
+# labels  #Themes 
+p_2 <- ggplot2::ggplot(data = economics,aes(x = date,y = pce))+geom_line(color = "dodger blue", size = 1) 
+p_2+labs(title="Evolution des dépenses", x="la date",y="dépenses")+theme(plot.title = element_text(size=30,hjust = 0.5))
+# on va changer le format de la date
+p_2+scale_x_discrete(breaks = date_breaks("5 years"), labels = date_format("%Y"))
+
+#facets
+p_2+facet_wrap(~ cut,ncol = 3)
+
+
+
+
+#grid arrange : 
+data(mpg)
+sp<- ggplot(mpg, aes())
+
 

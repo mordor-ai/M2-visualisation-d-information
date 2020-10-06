@@ -1,11 +1,11 @@
 ---
 title: "M2 Visualisation d'informations sur R"
-subtitle: "ggplot2 - partie 1: Introduction"
-author: 'Arnaud MILET <br> arnaud.milet@d-sidd.com'
-
+author: "Arnaud MILET <br> arnaud.milet@d-sidd.com"
+subtitle: 'ggplot2 - partie 1: Introduction'
 output:
+  ioslides_presentation: default
   slidy_presentation:
-    footer: "UFR 6 - Département MIAp - Visualisation d’informations"
+    footer: UFR 6 - Département MIAp - Visualisation d’informations
     includes:
       in_header: ../Elements/Images/entete.html
 ---
