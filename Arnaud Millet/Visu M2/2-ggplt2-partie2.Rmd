@@ -1,0 +1,788 @@
+---
+title: "M2 Visualisation d'informations sur R"
+subtitle: "ggplot2 - partie 2: Mise en forme avancée"
+author: 'Arnaud MILET <br> arnaud.milet@d-sidd.com'
+
+output:
+  slidy_presentation:
+    footer: "UFR 6 - Département MIAp - Visualisation d’informations"
+    includes:
+      in_header: ../Elements/Images/entete.html
+---  
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(grid)
+library(gridExtra)
+library(ggplot2)
+```
+
+## ggplot() vs qplot()
+
+Nous avons vu comment créer des graphiques avec qplot. Si vous devez personnaliser vos sorties graphiques, il est alors préférable de basculer vers la fonction ggplot() qui s'avère beaucoup plus complète. C'est une fonction *générique* qui vous permettra de réaliser n'importe quel graphique. Elle est articulée autour de "Grammar of graphics" et reprend certains termes de qplot. En particulier les géométries.
+
+## Grammar of Graphics
+
+Construire tous les graphiques à partir d'un même petit nombre d'éléments : 
+   
+* data : Données qui contient les variables que l’on veut représenter ;  
+* aesthetics(aes) : Variables à représenter, couleurs, tailles, formes ;  
+* geometrics(geom...) : Type de représentation;  
+* statistics(stat...) : Transformations des données éventuelles ;  
+* scales(scale...) : Lien entre les données et les aesthetics.  
+* coordinate
+* position
+* faceting
+
+## Réaliser un graphique, les différentes écritures
+
+```{r}
+#Ecriture 1
+g1<-ggplot(data = diamonds,aes(x=carat,y=price))+
+  geom_point()
+
+#Ecriture 2
+g2<-ggplot()+geom_point(data = diamonds,aes(x=carat,y=price))
+
+#Ecriture 3
+g3<-ggplot()
+g3<-g3+geom_point(data = diamonds,aes(x=carat,y=price))
+
+#Ecriture 4
+g4<-ggplot(data = diamonds,aes(x=carat,y=price))
+g4<-g4+geom_point()
+
+#Ecriture 5
+g5<-ggplot(data = diamonds)
+g5<-g5+geom_point(aes(x=carat,y=price))
+
+grid.arrange(g1,g2,g3,g4,g5,ncol=3,nrow=2)
+
+```
+
+## geom_ & aesthetics
+
+### aesthetic
+
+Dans ggplot, aesthetic signifie ce que l'on peut voir 
+* position (i.e., sur les axes x et y)
+* color (couleur de contour)
+* fill (couleur intérieure)
+* shape (la forme des points)
+* linetype (la forme des lignes)
+* size
+
+Chaque type de geomtrie accepte uniquement certains arguments.
+L'aide apporte ces réponses
+La fonction aes() définit ce que l'on va reporter sur notre graphique.
+
+***
+
+### Géometrie
+
+La géométrie représente la forme de représentation que l'on souhaite avoir. Voici quelques exemples issus de l'aide: help.search("geom_", package = "ggplot2")
+
+```{r echo=FALSE}
+#Nuage de point    : geom_point()
+p <- ggplot(mtcars, aes(wt, mpg))
+g1<-p + geom_point()+ggtitle("geom_point()")
+
+#Ligne             : geom_line()
+g2<-ggplot(economics, aes(date, unemploy)) + geom_line()+ggtitle("geom_line()")
+
+
+#boxplot           : geom_boxplot()
+p <- ggplot(mpg, aes(class, hwy))
+g3<-p + geom_boxplot()+ggtitle("geom_boxplot()")
+
+grid.arrange(g1,g2,g3,nrow=1,ncol=3)
+
+```
+
+***
+
+```{r echo=FALSE}
+#diagramme         : geom_bar()
+g <- ggplot(mpg, aes(class))
+g4<-g + geom_bar()+ggtitle("geom_bar()")
+
+#texte             : geom_text()
+p <- ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars)))
+g5<-p + geom_text()+ggtitle("geom_text()")
+
+#Droite            : geom_abline()
+p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+g6<-p + geom_abline(intercept = 20)+ggtitle("geom_abline()")
+
+grid.arrange(g4,g5,g6,nrow=1,ncol=3)
+
+```
+
+***
+
+```{r echo=FALSE}
+#Carte de chaleur  : geom_bin2d()
+d <- ggplot(diamonds, aes(x, y)) + xlim(4, 10) + ylim(4, 10)
+g7<-d + geom_bin2d()+ggtitle("geom_bin2d()")
+
+#Dessiner le vide  : geom_blank()
+g8<-ggplot(mtcars, aes(wt, mpg))+geom_blank()+ggtitle("geom_blank()")
+
+#Dessiner des contours  : geom_contour()
+v <- ggplot(faithfuld, aes(waiting, eruptions, z = density))
+g9<-v + geom_contour()+ggtitle("geom_contour()")
+
+grid.arrange(g7,g8,g9,nrow=1,ncol=3)
+
+```
+
+***
+
+```{r echo=FALSE}
+
+# geom_count()
+g10<-ggplot(mpg, aes(cty, hwy)) +
+ geom_count()+ggtitle("geom_count()")
+
+#Graphe de densité: geom_density()
+g11<-ggplot(diamonds, aes(carat)) +
+  geom_density()+ggtitle("geom_density()")
+
+#geom_density_2d()
+m <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
+ geom_point() +
+ xlim(0.5, 6) +
+ ylim(40, 110)
+g12<-m + geom_density_2d()+ggtitle("geom_density_2d()")
+
+grid.arrange(g10,g11,g12,nrow=1,ncol=3)
+
+```
+
+***
+
+```{r echo=FALSE}
+#geom_dotplot()
+g13<-ggplot(mtcars, aes(x = mpg)) + geom_dotplot()+ggtitle("geom_dotplot()")
+
+#geom_errorbarh()
+df <- data.frame(
+  trt = factor(c(1, 1, 2, 2)),
+  resp = c(1, 5, 3, 4),
+  group = factor(c(1, 2, 1, 2)),
+  se = c(0.1, 0.3, 0.3, 0.2)
+)
+
+p <- ggplot(df, aes(resp, trt, colour = group))
+g14<-p + geom_point() +
+  geom_errorbarh(aes(xmax = resp + se, xmin = resp - se))+ggtitle("geom_errorbarh()")
+
+#geom_hex()
+d <- ggplot(diamonds, aes(carat, price))
+g15<-d + geom_hex()+ggtitle("geom_hex()")
+
+grid.arrange(g13,g14,g15,nrow=1,ncol=3)
+
+```
+
+***
+
+```{r echo=FALSE}
+#geom_freqpoly()
+g16<-ggplot(diamonds, aes(price, colour = cut)) +
+  geom_freqpoly(binwidth = 500)+ggtitle("geom_freqpoly()")
+
+#geom_jitter()
+p <- ggplot(mpg, aes(cyl, hwy))
+g17<-p + geom_jitter()+ggtitle("geom_jitter()")
+
+# geom_crossbar()
+df <- data.frame(
+  trt = factor(c(1, 1, 2, 2)),
+  resp = c(1, 5, 3, 4),
+  group = factor(c(1, 2, 1, 2)),
+  upper = c(1.1, 5.3, 3.3, 4.2),
+  lower = c(0.8, 4.6, 2.4, 3.6)
+)
+
+p <- ggplot(df, aes(trt, resp, colour = group))
+
+g18<-p + geom_crossbar(aes(ymin = lower, ymax = upper), width = 0.2)+ggtitle("geom_crossbar()")
+
+grid.arrange(g16,g17,g18,nrow=1,ncol=3)
+
+```
+
+***
+
+``````{r echo=FALSE}
+
+#geom_map()
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+crimesm <- reshape2::melt(crimes, id = 1)
+if (require(maps)) {
+  states_map <- map_data("state")
+  g19<-ggplot(crimes, aes(map_id = state)) +
+    geom_map(aes(fill = Murder), map = states_map) +
+    expand_limits(x = states_map$long, y = states_map$lat)+
+    ggtitle("geom_map()")
+}
+
+# geom_path()
+m <- ggplot(economics, aes(unemploy/pop, psavert))
+g20<-m + geom_path()+ggtitle("geom_path()")
+
+# geom_polygon()
+ids <- factor(c("1.1", "2.1", "1.2", "2.2", "1.3", "2.3"))
+
+values <- data.frame(
+  id = ids,
+  value = c(3, 3.1, 3.1, 3.2, 3.15, 3.5)
+)
+
+positions <- data.frame(
+  id = rep(ids, each = 4),
+  x = c(2, 1, 1.1, 2.2, 1, 0, 0.3, 1.1, 2.2, 1.1, 1.2, 2.5, 1.1, 0.3,
+  0.5, 1.2, 2.5, 1.2, 1.3, 2.7, 1.2, 0.5, 0.6, 1.3),
+  y = c(-0.5, 0, 1, 0.5, 0, 0.5, 1.5, 1, 0.5, 1, 2.1, 1.7, 1, 1.5,
+  2.2, 2.1, 1.7, 2.1, 3.2, 2.8, 2.1, 2.2, 3.3, 3.2)
+)
+
+# Currently we need to manually merge the two together
+datapoly <- merge(values, positions, by = c("id"))
+
+g21 <- ggplot(datapoly, aes(x = x, y = y)) +
+  geom_polygon(aes(fill = value, group = id))+ggtitle("geom_polygon()")
+
+grid.arrange(g19,g20,g21,nrow=1,ncol=3)
+
+```
+
+***
+
+```{r echo=FALSE}
+
+# geom_qq_line()
+df <- data.frame(y = rt(200, df = 5))
+p <- ggplot(df, aes(sample = y))
+g22<-p + stat_qq() + stat_qq_line()+ggtitle("geom_qq_line()")
+
+#geom_quantile()
+m <- ggplot(mpg, aes(displ, 1 / hwy)) + geom_point()
+g23<-m + geom_quantile()+ggtitle("geom_quantile()")
+
+# geom_ribbon()
+
+huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
+h <- ggplot(huron, aes(year))
+g24<-h + geom_ribbon(aes(ymin=0, ymax=level))+ggtitle("geom_ribbon()")
+
+
+grid.arrange(g22,g23,g24,nrow=1,ncol=3)
+
+```
+
+***
+
+```{r echo=FALSE}
+# geom_rug()
+p <- ggplot(mtcars, aes(wt, mpg)) +
+  geom_point()
+g25<-p + geom_rug()+ggtitle("geom_rug()")
+
+# geom_segment()
+b <- ggplot(mtcars, aes(wt, mpg)) +
+  geom_point()
+
+df <- data.frame(x1 = 2.62, x2 = 3.57, y1 = 21.0, y2 = 15.0)
+g26<-b +
+ geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2, colour = "segment"), data = df)+ggtitle("geom_segment()")
+
+# geom_smooth()
+g27<-ggplot(mpg, aes(displ, hwy)) +
+  geom_smooth()+ggtitle("geom_smooth()")
+
+
+grid.arrange(g25,g26,g27,nrow=1,ncol=3)
+
+```
+
+***
+
+```{r echo=FALSE}
+# geom_spoke()
+df <- expand.grid(x = 1:10, y=1:10)
+df$angle <- runif(100, 0, 2*pi)
+df$speed <- runif(100, 0, sqrt(0.1 * df$x))
+
+g28<-ggplot(df, aes(x, y)) +
+  geom_point() +
+  geom_spoke(aes(angle = angle), radius = 0.5)
+
+# geom_label()
+p <- ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars)))
+g29<-p + geom_label()+ggtitle("geom_label()")
+
+# geom_raster()
+g30<-ggplot(faithfuld, aes(waiting, eruptions)) +
+ geom_raster(aes(fill = density))+ggtitle("geom_raster()")
+
+grid.arrange(g28,g29,g30,nrow=1,ncol=3)
+
+```
+
+## Au delà de 2 dimensions:
+
+Au delà de 2 dimensions, on peut représenter les données avec:
+
+
+```{r}
+#Couleurs: color
+ggplot(diamonds, aes(x=carat, y=price, color=cut))+
+  geom_point()
+
+```
+
+***
+
+```{r}
+#Forme: shape
+ggplot(diamonds, aes(x=carat, y=price, shape=cut))+
+  geom_point()
+
+```
+
+***
+
+```{r}
+#Taille: size
+ggplot(diamonds, aes(x=carat, y=price, size=cut))+
+  geom_point()
+```
+
+***
+
+```{r}
+#Transparence/Opacité: alpha
+ggplot(diamonds, aes(x=carat, y=price, alpha=cut))+
+  geom_point()
+
+```
+
+***
+
+```{r}
+#Les formes possibles
+shapes <- data.frame(
+  shape = c(0:19, 22, 21, 24, 23, 20),
+  x = 0:24 %/% 5,
+  y = -(0:24 %% 5)
+)
+
+ggplot(shapes, aes(x, y)) + 
+  geom_point(aes(shape = shape), size = 5, fill = "red") +
+  geom_text(aes(label = shape), hjust = 0, nudge_x = 0.15) +
+  scale_shape_identity() +
+  expand_limits(x = 4.1) +
+  scale_x_continuous(NULL, breaks = NULL) + 
+  scale_y_continuous(NULL, breaks = NULL)
+
+```
+
+***
+
+```{r}
+#Les couleurs
+colors() #Couleurs prédéfinies
+rgb(1,1,1) #renvoie le code hexadecimal correspondant
+rgb(255,255,255,maxColorValue=255)
+colorRampPalette(c("blue", "red"))(4)
+
+library(dplyr) # nécessaire pour la manipulation de données
+library(magrittr) #nécessaire pour l'écriture en pipe
+
+Pallette_Couleur<-colorRampPalette(c("green", "red"))
+
+couleurs_graphe<-diamonds%>%
+  distinct(cut)%>%
+  nrow()%>%
+  Pallette_Couleur()
+
+ggplot(diamonds, aes(x=carat, y=price, color=cut))+
+  geom_point()+
+  scale_color_manual(values=couleurs_graphe)
+
+```
+
+## Superposer des géometries: les couches
+
+```{r}
+ggplot(diamonds, aes(x=carat, y=price, color=cut)) + 
+  geom_point() + 
+  geom_smooth() 
+
+```
+
+```{r}
+ggplot(diamonds, aes(x=carat, y=price, color=cut)) + 
+  geom_point() + 
+  geom_smooth(data = filter(diamonds, cut == "Premium"), se = FALSE)
+```
+
+```{r}
+ggplot(diamonds, aes(x=carat, y=price)) + 
+  geom_point(aes(color=cut)) + 
+  geom_smooth()
+```
+
+## Transformation statistiques
+
+Certains graphiques (comme les nuages de points) ne requièrent pas de transformations. D'autres comme les boxplots ou les histogrammes le nécessitent.
+
+Chaque type de géométrie a une transformation statistique par défaut.
+Pour geom_histogram(), la statistique par défaut est stat_bin.
+
+
+```{r}
+args(geom_histogram)
+args(geom_point)
+
+```
+
+***
+
+```{r}
+p2 <- ggplot(diamonds, aes(x = price))
+p2 + geom_histogram()
+
+```
+
+***
+
+
+
+```{r}
+
+#On peut changer la largeur des intervalles
+p2 + geom_histogram(stat = "bin", binwidth=100)
+
+```
+
+***
+
+
+```{r}
+Somme_Diamants <- diamonds%>%
+  group_by(cut)%>%
+  summarise(prix_moyen=mean(price))
+
+# Une erreur
+# ggplot(Somme_Diamants, aes(x=cut, y=prix_moyen)) + 
+# geom_bar()
+
+ggplot(Somme_Diamants, aes(x=cut, y=prix_moyen)) + 
+  geom_bar(stat='identity')
+
+```
+
+***
+
+```{r}
+ggplot(diamonds, aes(x=cut, y=price, fill=as.factor(cut))) + 
+  geom_bar(stat = "summary", fun.y = "mean")
+
+```
+
+***
+
+```{r}
+ggplot(diamonds, aes(x=cut, y=price, fill=as.factor(cut))) + 
+  geom_bar(stat = "summary", fun.y = "mean",fill="#666666")
+
+
+```
+
+***
+
+
+```{r}
+ggplot(diamonds, aes(x=cut, y=price, fill=as.factor(cut))) + 
+  geom_bar(stat = "summary", fun.y = "mean")+
+  scale_fill_manual(values=rep("#666666",5))+
+  theme(
+    legend.position = "none"
+  )
+
+```
+
+## Scale: mise en forme des aesthetics
+Nous avons vu ci-dessus que les variables pouvaient
+être représentées par:  
+• color 
+• fill  
+• size  
+• shape 
+• linetype  
+
+```{r}
+p2<-ggplot(diamonds, aes(x=clarity,y=price,color=carat))+
+  geom_point()
+
+p3<-ggplot(diamonds, aes(x=clarity,y=price,color=carat))+
+  geom_point(alpha = 0.5,
+             size = 1.5,
+             position = position_jitter(width = 0.25, height = 0))
+
+p3+scale_x_discrete(name='Clarté')+
+  scale_y_continuous(name='Prix')+
+  scale_color_continuous(name="",
+                         breaks = quantile(diamonds$carat),
+                         labels = c("0%", "","50%","","100%"),
+                         low = "blue", high = "red")
+```
+
+
+## Les labels
+
+```{r}
+gg <- ggplot(diamonds, aes(x=carat, y=price, color=cut))+
+  geom_point() + 
+  labs(title="Nuage de points", x="Carat", y="Prix")
+gg
+```
+
+## Les thèmes
+
+```{r}
+gg1 <- gg + 
+  theme(plot.title=element_text(size=30, face="bold"), 
+                  axis.text.x=element_text(size=15), 
+                  axis.text.y=element_text(size=15),
+                  axis.title.x=element_text(size=25),
+                  axis.title.y=element_text(size=25)) +
+  scale_color_discrete(name="Taille des diamants")
+
+gg1  
+```
+
+## Les facets
+
+```{r}
+gg1 +
+  facet_wrap( ~ cut, ncol=3) 
+
+gg1 +
+  facet_grid( ~ cut) 
+
+gg1 + facet_wrap(color ~ cut) 
+
+```
+
+## Découper la fenêtre graphique
+
+### grid.arrange() du package gridExtra
+
+```{r echo=TRUE,eval=FALSE}
+library(gridExtra)
+# Nuage de points
+data(mpg)
+sp <- ggplot(mpg, aes(x = cty, y = hwy, colour = factor(cyl)))+ 
+  geom_point(size=2.5)
+
+sp
+# Bar plot
+bp <- ggplot(diamonds, aes(clarity, fill = cut)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle=70, vjust=0.5))
+bp
+
+grid.arrange(sp,bp,ncol=2,nrow=1)
+
+```
+
+***
+
+```{r echo=FALSE}
+library(gridExtra)
+# Nuage de points
+data(mpg)
+sp <- ggplot(mpg, aes(x = cty, y = hwy, colour = factor(cyl)))+ 
+  geom_point(size=2.5)
+
+sp
+# Bar plot
+bp <- ggplot(diamonds, aes(clarity, fill = cut)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle=70, vjust=0.5))
+bp
+
+grid.arrange(sp,bp,ncol=2,nrow=1)
+```
+
+### ggdraw() du package cowplot
+
+La fonction draw_plot() peut être utilisée pour placer
+des graphiques dans des sites spécifiques avec une taille
+particulière. Le format de la fonction est la suivante:
+
+draw_plot(plot, x = 0, y = 0, width = 1, height = 1)
+
+plot: Le graphique à placer (ggplot2 ou un gtable)
+x: L’abscisse x du coin inférieur gauche du graphique
+y: L’ordonnée y du coin inférieur gauche du graphique
+width, height: la largeur et la hauteur du graphique
+
+
+La fonction ggdraw() est utilisée pour initialiser le graphique.
+
+```{r}
+library(cowplot)
+data(iris)
+plot.iris <- ggplot(iris, aes(Sepal.Length, Sepal.Width)) + 
+  geom_point() + facet_grid(. ~ Species) +
+  stat_smooth(method = "lm") 
+
+ggdraw() +
+  draw_plot(plot.iris, 0, .5, 1, .5) +
+  draw_plot(sp, 0, 0, .5, .5) +
+  draw_plot(bp, .5, 0, .5, .5) +
+  draw_plot_label(c("A", "B", "C"), c(0, 0, 0.5), c(1, 0.5, 0.5), size = 15)
+```
+
+## Sauver un graphique avec la fonction ggsave()
+
+```{r eval=FALSE}
+ggsave("ggdraw.pdf", width = 20, height = 20, units = "cm")
+```
+
+
+
+## Diagramme en barre: position
+
+```{r}
+g1<-ggplot(data = mpg) + 
+  geom_bar(aes(x = fl, fill=drv),position="stack")+
+  labs(title="stack")
+
+g2<-ggplot(data = mpg) + 
+  geom_bar(aes(x = fl, fill=drv),position="fill")+
+  labs(title="fill")
+
+g3<-ggplot(data = mpg) + 
+  geom_bar(aes(x = fl, fill=drv),position="dodge")+
+  labs(title="dodge")
+
+grid.arrange(g1, g2, g3,ncol = 3, nrow = 1)
+```
+
+## Cas particulier du graphe sectoriel
+
+```{r}
+# Etape 1: Histogramme
+hist<- ggplot(data = mpg) + 
+  geom_bar(aes(x = factor(1), fill=drv),position="fill", width = 1)
+hist
+```
+
+***
+
+```{r}
+# Etape 2: On transforme l'histogramme en camembert
+camembert <- hist + coord_polar("y")
+camembert
+
+```
+
+***
+
+```{r}
+# Etape 3: On met en forme notre camembert
+
+camembert_propre <- camembert + scale_fill_manual(values=c("#257C9E", "#58AECE","#78B6CE")) + 
+  theme(
+    axis.text.x=element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.border = element_blank(),
+    panel.grid=element_blank(),
+    axis.ticks = element_blank(),
+    plot.title=element_text(size=14, face="bold",hjust = 0.5, color='#797979'),# taille du titre, caractère gras et centrage du titre
+    legend.position="none"
+  )
+camembert_propre
+
+
+```
+
+***
+
+```{r}
+# Etape 4: On met des étiquettes
+
+Lab<-mpg%>%
+  group_by(drv)%>%
+  summarise (n = n())%>%
+  mutate(freq = n / sum(n),
+         rsomcum=rev(cumsum(rev(freq))),
+         milieu=rsomcum-freq/2,
+         labels=paste0(round(freq*100,1), '%'))
+
+camembert_propre+
+geom_text(data=Lab,aes(x=1.2, y=milieu,label=labels),
+          color="#FFFFFF",
+          fontface="bold",
+          size=3.3
+)
+  
+
+```
+
+
+## Annoter les graphiques
+
+
+```{r}
+#Serie temporelle
+data(economics, package="ggplot2")  # init data
+economics <- data.frame(economics)  # convert to dataframe
+p<-ggplot(economics) + 
+  geom_line(aes(x=date, y=pce, color="pcs")) + 
+  geom_line(aes(x=date, y=unemploy, col="unemploy")) + 
+  scale_color_discrete(name="Legend") + 
+  labs(title="Economics") 
+p
+
+```
+
+***
+
+```{r}
+#Ajouter du texte sur une position spécifique
+p + annotate("text", x = economics$date[which.max(economics$unemploy)], y = economics$unemploy[which.max(economics$unemploy)], label ="Max" , size=3 , angle=0, fontface="bold",hjust = 1.5)
+
+```
+
+***
+
+```{r}
+# Ajouter un rectangle
+library("lubridate")
+x1<-floor_date(economics$date[which.max(economics$unemploy)]-(365*5), unit = "year")
+x2<-floor_date(economics$date[which.max(economics$unemploy)]+(365*5), unit = "year")-1
+y1<-economics$unemploy[which.max(economics$unemploy)]-1000
+y2<-economics$unemploy[which.max(economics$unemploy)]+1000
+p + annotate("rect", xmin=x1, xmax=x2, ymin=y1 , ymax=y2, alpha=0.2, color="blue", fill="blue")
+
+```
+
+***
+
+```{r}
+# Ajouter une flêche
+p + annotate("segment", x = economics$date[which.max(economics$unemploy)]-(365*10), 
+             xend = economics$date[which.max(economics$unemploy)], 
+             y = max(economics$unemploy), 
+             yend = max(economics$unemploy), 
+             colour = "pink", size=1, alpha=0.6, arrow=arrow())
+```
+
