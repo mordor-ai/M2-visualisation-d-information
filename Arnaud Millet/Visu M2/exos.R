@@ -61,3 +61,13 @@ data(mpg)
 sp<- ggplot(mpg, aes())
 
 
+
+
+
+
+library(cowplot)
+data("iris")
+plot.iris  <-ggplot(iris, aes(x=iris$Sepal.Length,y=iris$Sepal.width))+geom_point()+ facet_grid(.~Species)+stat_smooth(method = "lm")
+
+ggdraw()+draw_plot(plot.iris, O,.5,1,.5)
+# todo : retenir aes, datas , ameliorer le s graphiques 
