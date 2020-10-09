@@ -39,7 +39,7 @@ function createContent() { // Create a color cube and add it to the scene
 
   var cylinderGeometry = new THREE.CylinderGeometry(1, 1, 10, 32);
   var material = new THREE.MeshBasicMaterial({
-    color: 0xee00ab
+    color: 0x2a2a1e
   });
 
   column = new THREE.Mesh(cylinderGeometry, material)
