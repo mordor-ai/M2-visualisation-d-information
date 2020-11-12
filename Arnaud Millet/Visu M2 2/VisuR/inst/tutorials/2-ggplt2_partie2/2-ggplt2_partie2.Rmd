@@ -1,0 +1,1767 @@
+---
+title: "Logiciel R"
+subtitle: Visualisation sur R - Approfondissement de ggplot2
+author: "Arnaud MILET - arnaud.milet@d-sidd.com"
+output: 
+  learnr::tutorial:
+    css: css/style_tuto_arnaud.css
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE, warning=FALSE,message=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,warning = F,error = F)
+library(grid)
+library(gridExtra)
+library(ggplot2)
+library(tidyverse)
+```
+
+## ggplot() vs qplot()
+
+Nous avons vu comment créer des graphiques avec qplot. Si vous devez personnaliser vos sorties graphiques, il est alors préférable de basculer vers la fonction ggplot() qui s'avère beaucoup plus complète. C'est une fonction *générique* qui vous permettra de réaliser n'importe quel graphique. Elle est articulée autour de "Grammar of graphics" et reprend certains termes de qplot. En particulier les géométries.
+
+## Grammar of Graphics
+
+Construire tous les graphiques à partir d'un même petit nombre d'éléments : 
+   
+* data : Données qui contient les variables que l’on veut représenter ;  
+* aesthetics(aes) : Variables à représenter, couleurs, tailles, formes ;  
+* geometrics(geom...) : Type de représentation;  
+* statistics(stat...) : Transformations des données éventuelles ;  
+* scales(scale...) : Lien entre les données et les aesthetics.  
+* coordinate
+* position
+* faceting
+
+## Réaliser un graphique, les différentes écritures
+
+```{r ecritures, exercise = TRUE, exercise.eval = FALSE}
+#Ecriture 1
+g1<-ggplot(data = diamonds,aes(x=carat,y=price))+
+  geom_point()
+
+#Ecriture 2
+g2<-ggplot()+geom_point(data = diamonds,aes(x=carat,y=price))
+
+#Ecriture 3
+g3<-ggplot()
+g3<-g3+geom_point(data = diamonds,aes(x=carat,y=price))
+
+#Ecriture 4
+g4<-ggplot(data = diamonds,aes(x=carat,y=price))
+g4<-g4+geom_point()
+
+#Ecriture 5
+g5<-ggplot(data = diamonds)
+g5<-g5+geom_point(aes(x=carat,y=price))
+
+grid.arrange(g1,g2,g3,g4,g5,ncol=3,nrow=2)
+
+```
+
+## geom_ & aesthetics
+
+### aesthetic
+
+Dans ggplot, aesthetic signifie ce que l'on peut voir 
+* position (i.e., sur les axes x et y)
+* color (couleur de contour)
+* fill (couleur intérieure)
+* shape (la forme des points)
+* linetype (la forme des lignes)
+* size
+
+Chaque type de geomtrie accepte uniquement certains arguments.
+L'aide apporte ces réponses
+La fonction aes() définit ce que l'on va reporter sur notre graphique.
+
+
+### Géometrie
+
+La géométrie représente la forme de représentation que l'on souhaite avoir. Voici quelques exemples issus de l'aide: help.search("geom_", package = "ggplot2")
+
+```{r echo=FALSE}
+#Nuage de point    : geom_point()
+p <- ggplot(mtcars, aes(wt, mpg))
+g1<-p + geom_point()+ggtitle("geom_point()")
+
+#Ligne             : geom_line()
+g2<-ggplot(economics, aes(date, unemploy)) + geom_line()+ggtitle("geom_line()")
+
+
+#boxplot           : geom_boxplot()
+p <- ggplot(mpg, aes(class, hwy))
+g3<-p + geom_boxplot()+ggtitle("geom_boxplot()")
+
+grid.arrange(g1,g2,g3,nrow=1,ncol=3)
+
+```
+
+
+
+```{r echo=FALSE}
+#diagramme         : geom_bar()
+g <- ggplot(mpg, aes(class))
+g4<-g + geom_bar()+ggtitle("geom_bar()")
+
+#texte             : geom_text()
+p <- ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars)))
+g5<-p + geom_text()+ggtitle("geom_text()")
+
+#Droite            : geom_abline()
+p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+g6<-p + geom_abline(intercept = 20)+ggtitle("geom_abline()")
+
+grid.arrange(g4,g5,g6,nrow=1,ncol=3)
+
+```
+
+
+
+```{r echo=FALSE}
+#Carte de chaleur  : geom_bin2d()
+d <- ggplot(diamonds, aes(x, y)) + xlim(4, 10) + ylim(4, 10)
+g7<-d + geom_bin2d()+ggtitle("geom_bin2d()")
+
+#Dessiner le vide  : geom_blank()
+g8<-ggplot(mtcars, aes(wt, mpg))+geom_blank()+ggtitle("geom_blank()")
+
+#Dessiner des contours  : geom_contour()
+v <- ggplot(faithfuld, aes(waiting, eruptions, z = density))
+g9<-v + geom_contour()+ggtitle("geom_contour()")
+
+grid.arrange(g7,g8,g9,nrow=1,ncol=3)
+
+```
+
+
+
+```{r echo=FALSE}
+
+# geom_count()
+g10<-ggplot(mpg, aes(cty, hwy)) +
+ geom_count()+ggtitle("geom_count()")
+
+#Graphe de densité: geom_density()
+g11<-ggplot(diamonds, aes(carat)) +
+  geom_density()+ggtitle("geom_density()")
+
+#geom_density_2d()
+m <- ggplot(faithful, aes(x = eruptions, y = waiting)) +
+ geom_point() +
+ xlim(0.5, 6) +
+ ylim(40, 110)
+g12<-m + geom_density_2d()+ggtitle("geom_density_2d()")
+
+grid.arrange(g10,g11,g12,nrow=1,ncol=3)
+
+```
+
+
+
+```{r echo=FALSE}
+#geom_dotplot()
+g13<-ggplot(mtcars, aes(x = mpg)) + geom_dotplot()+ggtitle("geom_dotplot()")
+
+#geom_errorbarh()
+df <- data.frame(
+  trt = factor(c(1, 1, 2, 2)),
+  resp = c(1, 5, 3, 4),
+  group = factor(c(1, 2, 1, 2)),
+  se = c(0.1, 0.3, 0.3, 0.2)
+)
+
+p <- ggplot(df, aes(resp, trt, colour = group))
+g14<-p + geom_point() +
+  geom_errorbarh(aes(xmax = resp + se, xmin = resp - se))+ggtitle("geom_errorbarh()")
+
+#geom_hex()
+d <- ggplot(diamonds, aes(carat, price))
+g15<-d + geom_hex()+ggtitle("geom_hex()")
+
+grid.arrange(g13,g14,g15,nrow=1,ncol=3)
+
+```
+
+
+
+```{r echo=FALSE}
+#geom_freqpoly()
+g16<-ggplot(diamonds, aes(price, colour = cut)) +
+  geom_freqpoly(binwidth = 500)+ggtitle("geom_freqpoly()")
+
+#geom_jitter()
+p <- ggplot(mpg, aes(cyl, hwy))
+g17<-p + geom_jitter()+ggtitle("geom_jitter()")
+
+# geom_crossbar()
+df <- data.frame(
+  trt = factor(c(1, 1, 2, 2)),
+  resp = c(1, 5, 3, 4),
+  group = factor(c(1, 2, 1, 2)),
+  upper = c(1.1, 5.3, 3.3, 4.2),
+  lower = c(0.8, 4.6, 2.4, 3.6)
+)
+
+p <- ggplot(df, aes(trt, resp, colour = group))
+
+g18<-p + geom_crossbar(aes(ymin = lower, ymax = upper), width = 0.2)+ggtitle("geom_crossbar()")
+
+grid.arrange(g16,g17,g18,nrow=1,ncol=3)
+
+```
+
+
+
+``````{r echo=FALSE}
+
+#geom_map()
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+crimesm <- reshape2::melt(crimes, id = 1)
+if (require(maps)) {
+  states_map <- map_data("state")
+  g19<-ggplot(crimes, aes(map_id = state)) +
+    geom_map(aes(fill = Murder), map = states_map) +
+    expand_limits(x = states_map$long, y = states_map$lat)+
+    ggtitle("geom_map()")
+}
+
+# geom_path()
+m <- ggplot(economics, aes(unemploy/pop, psavert))
+g20<-m + geom_path()+ggtitle("geom_path()")
+
+# geom_polygon()
+ids <- factor(c("1.1", "2.1", "1.2", "2.2", "1.3", "2.3"))
+
+values <- data.frame(
+  id = ids,
+  value = c(3, 3.1, 3.1, 3.2, 3.15, 3.5)
+)
+
+positions <- data.frame(
+  id = rep(ids, each = 4),
+  x = c(2, 1, 1.1, 2.2, 1, 0, 0.3, 1.1, 2.2, 1.1, 1.2, 2.5, 1.1, 0.3,
+  0.5, 1.2, 2.5, 1.2, 1.3, 2.7, 1.2, 0.5, 0.6, 1.3),
+  y = c(-0.5, 0, 1, 0.5, 0, 0.5, 1.5, 1, 0.5, 1, 2.1, 1.7, 1, 1.5,
+  2.2, 2.1, 1.7, 2.1, 3.2, 2.8, 2.1, 2.2, 3.3, 3.2)
+)
+
+# Currently we need to manually merge the two together
+datapoly <- merge(values, positions, by = c("id"))
+
+g21 <- ggplot(datapoly, aes(x = x, y = y)) +
+  geom_polygon(aes(fill = value, group = id))+ggtitle("geom_polygon()")
+
+grid.arrange(g19,g20,g21,nrow=1,ncol=3)
+
+```
+
+
+
+```{r echo=FALSE}
+
+# geom_qq_line()
+df <- data.frame(y = rt(200, df = 5))
+p <- ggplot(df, aes(sample = y))
+g22<-p + stat_qq() + stat_qq_line()+ggtitle("geom_qq_line()")
+
+#geom_quantile()
+m <- ggplot(mpg, aes(displ, 1 / hwy)) + geom_point()
+g23<-m + geom_quantile()+ggtitle("geom_quantile()")
+
+# geom_ribbon()
+
+huron <- data.frame(year = 1875:1972, level = as.vector(LakeHuron))
+h <- ggplot(huron, aes(year))
+g24<-h + geom_ribbon(aes(ymin=0, ymax=level))+ggtitle("geom_ribbon()")
+
+
+grid.arrange(g22,g23,g24,nrow=1,ncol=3)
+
+```
+
+
+
+```{r echo=FALSE}
+# geom_rug()
+p <- ggplot(mtcars, aes(wt, mpg)) +
+  geom_point()
+g25<-p + geom_rug()+ggtitle("geom_rug()")
+
+# geom_segment()
+b <- ggplot(mtcars, aes(wt, mpg)) +
+  geom_point()
+
+df <- data.frame(x1 = 2.62, x2 = 3.57, y1 = 21.0, y2 = 15.0)
+g26<-b +
+ geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2, colour = "segment"), data = df)+ggtitle("geom_segment()")
+
+# geom_smooth()
+g27<-ggplot(mpg, aes(displ, hwy)) +
+  geom_smooth()+ggtitle("geom_smooth()")
+
+
+grid.arrange(g25,g26,g27,nrow=1,ncol=3)
+
+```
+
+
+
+```{r echo=FALSE}
+# geom_spoke()
+df <- expand.grid(x = 1:10, y=1:10)
+df$angle <- runif(100, 0, 2*pi)
+df$speed <- runif(100, 0, sqrt(0.1 * df$x))
+
+g28<-ggplot(df, aes(x, y)) +
+  geom_point() +
+  geom_spoke(aes(angle = angle), radius = 0.5)
+
+# geom_label()
+p <- ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars)))
+g29<-p + geom_label()+ggtitle("geom_label()")
+
+# geom_raster()
+g30<-ggplot(faithfuld, aes(waiting, eruptions)) +
+ geom_raster(aes(fill = density))+ggtitle("geom_raster()")
+
+grid.arrange(g28,g29,g30,nrow=1,ncol=3)
+
+```
+
+
+## Au delà de 2 dimensions:
+
+Au delà de 2 dimensions, on peut représenter les données avec:
+
+
+```{r dimensions, exercise = TRUE, exercise.eval = FALSE}
+#Couleurs: color
+ggplot(diamonds, aes(x=carat, y=price, color=cut))+
+  geom_point()
+
+```
+
+
+
+```{r shape, exercise = TRUE, exercise.eval = FALSE}
+#Forme: shape
+ggplot(diamonds, aes(x=carat, y=price, shape=cut))+
+  geom_point()
+
+```
+
+
+
+```{r taille, exercise = TRUE, exercise.eval = FALSE}
+#Taille: size
+ggplot(diamonds, aes(x=carat, y=price, size=cut))+
+  geom_point()
+```
+
+
+
+```{r transparence, exercise = TRUE, exercise.eval = FALSE}
+#Transparence/Opacité: alpha
+ggplot(diamonds, aes(x=carat, y=price, alpha=cut))+
+  geom_point()
+
+```
+
+
+
+```{r formes, exercise = TRUE, exercise.eval = FALSE}
+#Les formes possibles
+shapes <- data.frame(
+  shape = c(0:19, 22, 21, 24, 23, 20),
+  x = 0:24 %/% 5,
+  y = -(0:24 %% 5)
+)
+
+ggplot(shapes, aes(x, y)) + 
+  geom_point(aes(shape = shape), size = 5, fill = "red") +
+  geom_text(aes(label = shape), hjust = 0, nudge_x = 0.15) +
+  scale_shape_identity() +
+  expand_limits(x = 4.1) +
+  scale_x_continuous(NULL, breaks = NULL) + 
+  scale_y_continuous(NULL, breaks = NULL)
+
+```
+
+
+
+```{r couleurs, exercise = TRUE, exercise.eval = FALSE}
+#Les couleurs
+colors() #Couleurs prédéfinies
+rgb(1,1,1) #renvoie le code hexadecimal correspondant
+rgb(255,255,255,maxColorValue=255)
+colorRampPalette(c("blue", "red"))(4)
+
+library(dplyr) # nécessaire pour la manipulation de données
+library(magrittr) #nécessaire pour l'écriture en pipe
+
+Pallette_Couleur<-colorRampPalette(c("green", "red"))
+
+couleurs_graphe<-diamonds%>%
+  distinct(cut)%>%
+  nrow()%>%
+  Pallette_Couleur()
+
+ggplot(diamonds, aes(x=carat, y=price, color=cut))+
+  geom_point()+
+  scale_color_manual(values=couleurs_graphe)
+
+```
+
+## Superposer des géometries: les couches
+
+```{r superposer, exercise = TRUE, exercise.eval = FALSE}
+ggplot(diamonds, aes(x=carat, y=price, color=cut)) + 
+  geom_point() + 
+  geom_smooth() 
+
+```
+
+```{r superposer2, exercise = TRUE, exercise.eval = FALSE}
+ggplot(diamonds, aes(x=carat, y=price, color=cut)) + 
+  geom_point() + 
+  geom_smooth(data = filter(diamonds, cut == "Premium"), se = FALSE)
+```
+
+```{r superposer3, exercise = TRUE, exercise.eval = FALSE}
+ggplot(diamonds, aes(x=carat, y=price)) + 
+  geom_point(aes(color=cut)) + 
+  geom_smooth()
+```
+
+## Transformation statistiques
+
+Certains graphiques (comme les nuages de points) ne requièrent pas de transformations. D'autres comme les boxplots ou les histogrammes le nécessitent.
+
+Chaque type de géométrie a une transformation statistique par défaut.
+Pour geom_histogram(), la statistique par défaut est stat_bin.
+
+
+```{r transformation, exercise = TRUE, exercise.eval = FALSE}
+args(geom_histogram)
+args(geom_point)
+
+```
+
+
+
+```{r histo, exercise = TRUE, exercise.eval = FALSE}
+p2 <- ggplot(diamonds, aes(x = price))
+p2 + geom_histogram()
+
+```
+
+
+
+```{r include=FALSE}
+p2 <- ggplot(diamonds, aes(x = price))
+
+```
+
+
+```{r histo2, exercise = TRUE, exercise.eval = FALSE}
+
+#On peut changer la largeur des intervalles
+p2 + geom_histogram(stat = "bin", binwidth=100)
+
+```
+
+
+
+
+```{r diamants, exercise = TRUE, exercise.eval = FALSE}
+Somme_Diamants <- diamonds%>%
+  group_by(cut)%>%
+  summarise(prix_moyen=mean(price))
+
+# Une erreur
+# ggplot(Somme_Diamants, aes(x=cut, y=prix_moyen)) + 
+# geom_bar()
+
+ggplot(Somme_Diamants, aes(x=cut, y=prix_moyen)) + 
+  geom_bar(stat='identity')
+
+```
+
+
+
+```{r equivalents_diamants, exercise = TRUE, exercise.eval = FALSE}
+ggplot(diamonds, aes(x=cut, y=price, fill=as.factor(cut))) + 
+  geom_bar(stat = "summary", fun.y = "mean")
+
+```
+
+
+
+```{r equivalents_diamants2, exercise = TRUE, exercise.eval = FALSE}
+ggplot(diamonds, aes(x=cut, y=price, fill=as.factor(cut))) + 
+  geom_bar(stat = "summary", fun.y = "mean",fill="#666666")
+
+
+```
+
+
+
+
+```{r equivalents_diamants3, exercise = TRUE, exercise.eval = FALSE}
+ggplot(diamonds, aes(x=cut, y=price, fill=as.factor(cut))) + 
+  geom_bar(stat = "summary", fun.y = "mean")+
+  scale_fill_manual(values=rep("#666666",5))+
+  theme(
+    legend.position = "none"
+  )
+
+```
+
+## Scale: mise en forme des aesthetics
+Nous avons vu ci-dessus que les variables pouvaient
+être représentées par:  
+• color 
+• fill  
+• size  
+• shape 
+• linetype  
+
+```{r scale, exercise = TRUE, exercise.eval = FALSE}
+p2<-ggplot(diamonds, aes(x=clarity,y=price,color=carat))+
+  geom_point()
+
+p3<-ggplot(diamonds, aes(x=clarity,y=price,color=carat))+
+  geom_point(alpha = 0.5,
+             size = 1.5,
+             position = position_jitter(width = 0.25, height = 0))
+
+p3+scale_x_discrete(name='Clarté')+
+  scale_y_continuous(name='Prix')+
+  scale_color_continuous(name="",
+                         breaks = quantile(diamonds$carat),
+                         labels = c("0%", "","50%","","100%"),
+                         low = "blue", high = "red")
+```
+
+
+
+## Exercice
+
+Charger le package ggplot2, et utiliser la fonction data() pour charger en mémoire le jeu de données economics. Consulter la page d’aide de ce jeu de données pour prendre connaissance de son contenu ;
+
+```{r charger_data, exercise = TRUE, exercise.eval = FALSE}
+library(ggplot2)
+economics
+#?economics
+
+```
+
+
+### Exercice 1.1 
+
+À l’aide de la fonction ggplot(), représenter les dépenses personnelles de consommation (pce) en fonction de la date (date). Les observations doivent être connectées par une ligne.
+
+```{r ex1_1, exercise = TRUE, exercise.eval = FALSE}
+
+```
+
+```{ ex1_1-solution}
+ggplot(data = economics, aes(x = date, y = pce)) +
+geom_line()
+```
+
+
+### Exercice 1.2 
+
+Modifier le graphique de la question précédente de manière à ce que la couleur de la ligne soit dodger blue et définir la taille de la ligne à 0.5. Stocker le résultat dans un objet que l’on appellera p_1 ;
+
+```{r ex1_2, exercise = TRUE, exercise.eval = FALSE}
+
+```
+
+```{ ex1_2-solution}
+p_1 <- ggplot(data = economics, aes(x = date, y = pce)) + geom_line(colour = "dodger blue", size = 0.5)
+
+```
+
+```{r include=FALSE}
+p_1 <- ggplot(data = economics, aes(x = date, y = pce)) + geom_line(colour = "dodger blue", size = 0.5)
+
+```
+
+### Exercice 1.3 
+
+Ajouter une couche au graphique p_1 pour modifier les titres des axes (les retirer), et ajouter le titre suivant : "Personal Consumption Expenditures (billions dollars)".
+
+```{r ex1_3, exercise = TRUE, exercise.eval = FALSE}
+
+```
+
+```{ ex1_3-solution}
+p_1 <-p_1 +
+xlab("") + ylab("") +
+ggtitle("Personal Consumption Expenditures (billions dollars)")
+
+```
+
+```{r include=FALSE}
+p_1 <-p_1 +
+xlab("") + ylab("") +
+ggtitle("Personal Consumption Expenditures (billions dollars)")
+
+```
+
+### Exercice 1.4 
+
+Utiliser la fonction date_breaks() du package scales pour modifier l’échelle des abscisses de p_1, afin que les étiquettes des marques soient affichées tous les 5 ans ; à l’aide de la fonction date_format(), modifier le format de ces étiquettes pour que seule l’année des dates s’aﬃche ;
+
+```{r ex1_4, exercise = TRUE, exercise.eval = FALSE}
+
+```
+
+```{r ex1_4-solution}
+library(scales)
+p_1 +
+scale_x_date(breaks = date_breaks("5 year"), labels = date_format("%Y"))
+
+```
+
+```{r include=FALSE}
+library(scales)
+p_1 +
+scale_x_date(breaks = date_breaks("5 year"), labels = date_format("%Y"))
+
+```
+
+
+## Les labels
+
+```{r lab, exercise = TRUE, exercise.eval = FALSE}
+gg <- ggplot(diamonds, aes(x=carat, y=price, color=cut))+
+  geom_point() + 
+  labs(title="Nuage de points", x="Carat", y="Prix")
+
+gg
+
+```
+
+
+```{r include=FALSE}
+gg <- ggplot(diamonds, aes(x=carat, y=price, color=cut))+
+  geom_point() + 
+  labs(title="Nuage de points", x="Carat", y="Prix")
+
+```
+
+
+## Les thèmes
+
+```{r themes, exercise = TRUE, exercise.eval = FALSE}
+gg1 <- gg + 
+  theme(plot.title=element_text(size=30, face="bold"), 
+        axis.text.x=element_text(size=15), 
+        axis.text.y=element_text(size=15),
+        axis.title.x=element_text(size=25),
+        axis.title.y=element_text(size=25)) +
+  scale_color_discrete(name="Taille des diamants")
+
+gg1  
+```
+
+```{r include=FALSE}
+gg1 <- gg + 
+  theme(plot.title=element_text(size=30, face="bold"), 
+        axis.text.x=element_text(size=15), 
+        axis.text.y=element_text(size=15),
+        axis.title.x=element_text(size=25),
+        axis.title.y=element_text(size=25)) +
+  scale_color_discrete(name="Taille des diamants")
+```
+
+
+## Les facets
+
+```{r facet, exercise = TRUE, exercise.eval = FALSE}
+gg1 +
+  facet_wrap( ~ cut, ncol=3) 
+
+gg1 +
+  facet_grid( ~ cut) 
+
+gg1 + facet_wrap(color ~ cut) 
+
+```
+
+## Découper la fenêtre graphique
+
+### grid.arrange() du package gridExtra
+
+```{r decouper, exercise = TRUE, exercise.eval = FALSE}
+# Nuage de points
+data(mpg)
+sp <- ggplot(mpg, aes(x = cty, y = hwy, colour = factor(cyl)))+ 
+  geom_point(size=2.5)
+
+sp
+# Bar plot
+bp <- ggplot(diamonds, aes(clarity, fill = cut)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle=70, vjust=0.5))
+bp
+
+```
+
+
+```{r include=FALSE}
+data(mpg)
+sp <- ggplot(mpg, aes(x = cty, y = hwy, colour = factor(cyl)))+ 
+  geom_point(size=2.5)
+
+sp
+# Bar plot
+bp <- ggplot(diamonds, aes(clarity, fill = cut)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle=70, vjust=0.5))
+bp
+
+```
+
+```{r decouper2, exercise = TRUE, exercise.eval = FALSE}
+library(gridExtra)
+grid.arrange(sp,bp,ncol=2,nrow=1)
+```
+
+### ggdraw() du package cowplot
+
+La fonction draw_plot() peut être utilisée pour placer
+des graphiques dans des sites spécifiques avec une taille
+particulière. Le format de la fonction est la suivante:
+  
+  draw_plot(plot, x = 0, y = 0, width = 1, height = 1)
+
+plot: Le graphique à placer (ggplot2 ou un gtable)
+x: L’abscisse x du coin inférieur gauche du graphique
+y: L’ordonnée y du coin inférieur gauche du graphique
+width, height: la largeur et la hauteur du graphique
+
+
+La fonction ggdraw() est utilisée pour initialiser le graphique.
+
+```{r ggdraw, exercise = TRUE, exercise.eval = FALSE}
+library(cowplot)
+data(iris)
+plot.iris <- ggplot(iris, aes(Sepal.Length, Sepal.Width)) + 
+  geom_point() + facet_grid(. ~ Species) +
+  stat_smooth(method = "lm") 
+
+ggdraw() +
+  draw_plot(plot.iris, 0, .5, 1, .5) +
+  draw_plot(sp, 0, 0, .5, .5) +
+  draw_plot(bp, .5, 0, .5, .5) +
+  draw_plot_label(c("A", "B", "C"), c(0, 0, 0.5), c(1, 0.5, 0.5), size = 15)
+```
+
+## Sauver un graphique avec la fonction ggsave()
+
+```{r eval=FALSE}
+ggsave("chemin/ggdraw.pdf", width = 20, height = 20, units = "cm")
+```
+
+
+
+## Diagramme en barre: position
+
+```{r diagramme, exercise = TRUE, exercise.eval = FALSE}
+g1<-ggplot(data = mpg) + 
+  geom_bar(aes(x = fl, fill=drv),position="stack")+
+  labs(title="stack")
+
+g2<-ggplot(data = mpg) + 
+  geom_bar(aes(x = fl, fill=drv),position="fill")+
+  labs(title="fill")
+
+g3<-ggplot(data = mpg) + 
+  geom_bar(aes(x = fl, fill=drv),position="dodge")+
+  labs(title="dodge")
+
+grid.arrange(g1, g2, g3,ncol = 3, nrow = 1)
+```
+
+## Cas particulier du graphe sectoriel
+
+```{r camenbert, exercise = TRUE, exercise.eval = FALSE}
+# Etape 1: Histogramme
+hist<- ggplot(data = mpg) + 
+  geom_bar(aes(x = factor(1), fill=drv),position="fill", width = 1)
+hist
+```
+
+```{r include=FALSE}
+hist<- ggplot(data = mpg) + 
+  geom_bar(aes(x = factor(1), fill=drv),position="fill", width = 1)
+
+```
+
+
+```{r camenbert2, exercise = TRUE, exercise.eval = FALSE}
+# Etape 2: On transforme l'histogramme en camembert
+camembert <- hist + coord_polar("y")
+camembert
+
+```
+
+
+```{r include=FALSE}
+camembert <- hist + coord_polar("y")
+
+```
+
+```{r camenbert3, exercise = TRUE, exercise.eval = FALSE}
+# Etape 3: On met en forme notre camembert
+
+camembert_propre <- camembert + scale_fill_manual(values=c("#257C9E", "#58AECE","#78B6CE")) + 
+  theme(
+    axis.text.x=element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.border = element_blank(),
+    panel.grid=element_blank(),
+    axis.ticks = element_blank(),
+    plot.title=element_text(size=14, face="bold",hjust = 0.5, color='#797979'),# taille du titre, caractère gras et centrage du titre
+    legend.position="none"
+  )
+camembert_propre
+
+
+```
+
+```{r include=FALSE}
+camembert_propre <- camembert + scale_fill_manual(values=c("#257C9E", "#58AECE","#78B6CE")) + 
+  theme(
+    axis.text.x=element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.border = element_blank(),
+    panel.grid=element_blank(),
+    axis.ticks = element_blank(),
+    plot.title=element_text(size=14, face="bold",hjust = 0.5, color='#797979'),# taille du titre, caractère gras et centrage du titre
+    legend.position="none"
+  )
+
+```
+
+
+```{r camenbert4, exercise = TRUE, exercise.eval = FALSE}
+# Etape 4: On met des étiquettes
+
+Lab<-mpg%>%
+  group_by(drv)%>%
+  summarise (n = n())%>%
+  mutate(freq = n / sum(n),
+         rsomcum=rev(cumsum(rev(freq))),
+         milieu=rsomcum-freq/2,
+         labels=paste0(round(freq*100,1), '%'))
+
+camembert_propre+
+  geom_text(data=Lab,aes(x=1.2, y=milieu,label=labels),
+            color="#FFFFFF",
+            fontface="bold",
+            size=3.3
+  )
+
+
+```
+
+
+## Annoter les graphiques
+
+
+```{r annoter, exercise = TRUE, exercise.eval = FALSE}
+#Serie temporelle
+data(economics, package="ggplot2")  # init data
+economics <- data.frame(economics)  # convert to dataframe
+p<-ggplot(economics) + 
+  geom_line(aes(x=date, y=pce, color="pcs")) + 
+  geom_line(aes(x=date, y=unemploy, col="unemploy")) + 
+  scale_color_discrete(name="Legend") + 
+  labs(title="Economics") 
+p
+
+```
+
+
+```{r include=FALSE}
+economics <- data.frame(economics)  # convert to dataframe
+p<-ggplot(economics) + 
+  geom_line(aes(x=date, y=pce, color="pcs")) + 
+  geom_line(aes(x=date, y=unemploy, col="unemploy")) + 
+  scale_color_discrete(name="Legend") + 
+  labs(title="Economics") 
+```
+
+```{r annoter2, exercise = TRUE, exercise.eval = FALSE}
+#Ajouter du texte sur une position spécifique
+p + annotate("text", x = economics$date[which.max(economics$unemploy)], y = economics$unemploy[which.max(economics$unemploy)], label ="Max" , size=3 , angle=0, fontface="bold",hjust = 1.5)
+
+```
+
+
+
+```{r dates, exercise = TRUE, exercise.eval = FALSE}
+# Ajouter un rectangle
+library("lubridate")
+x1<-floor_date(economics$date[which.max(economics$unemploy)]-(365*5), unit = "year")
+x2<-floor_date(economics$date[which.max(economics$unemploy)]+(365*5), unit = "year")-1
+y1<-economics$unemploy[which.max(economics$unemploy)]-1000
+y2<-economics$unemploy[which.max(economics$unemploy)]+1000
+p + annotate("rect", xmin=x1, xmax=x2, ymin=y1 , ymax=y2, alpha=0.2, color="blue", fill="blue")
+
+```
+
+
+
+```{r fleche, exercise = TRUE, exercise.eval = FALSE}
+# Ajouter une flêche
+p + annotate("segment", x = economics$date[which.max(economics$unemploy)]-(365*10), 
+             xend = economics$date[which.max(economics$unemploy)], 
+             y = max(economics$unemploy), 
+             yend = max(economics$unemploy), 
+             colour = "pink", size=1, alpha=0.6, arrow=arrow())
+```
+
+
+
+
+## Exercices 
+
+### Exercice 2  (Créer un graphique avec plusieurs courbes, modifier son aspect)
+
+Charger le package ggplot2, et utiliser la fonction data() pour charger en mémoire le jeu de données economics. Consulter la page d’aide de ce jeu de données pour prendre connaissance de son contenu ;
+
+```{r}
+library(ggplot2)
+data(economics)
+#?economics
+
+```
+
+#### Exercice 2.1	
+
+Charger les packages dplyr et tidyr. Sélectionner les variables date, psavert et uempmed dans le tableau de données economics et utiliser la fonction gather() sur le résultat pour obtenir un tableau dans lequel chaque ligne indiquera la valeur (value) pour une variable donnée (key) à une date donnée (date). Stocker le résultat dans un objet que l’on appellera df ;
+
+```{r  ex2_1, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_1-solution}
+library(dplyr)
+library(tidyr)
+
+df <-economics %>%
+  select(date, psavert, uempmed) %>%
+  gather(key, value, -date)
+
+```
+
+```{r include=FALSE}
+library(dplyr)
+library(tidyr)
+
+df <-economics %>%
+  select(date, psavert, uempmed) %>%
+  gather(key, value, -date)
+```
+
+#### Exercice 2.2	
+
+Sur un même graphique, représenter à l’aide de lignes, l’évolution dans le temps du taux d’épargne personnelle (psavert) et de la durée médiane en semaines du chômage (uempmed). Stocker le graphique dans un objet que l’on appellera p_2 ;
+
+```{r  ex2_2, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_2-solution}
+p_2 <- ggplot(data = df,
+              aes(x = date, y = value)) +
+  geom_line(aes(group = key))
+
+p_2
+
+```
+
+```{r include=FALSE}
+p_2 <- ggplot(data = df,
+              aes(x = date, y = value)) +
+  geom_line(aes(group = key))
+```
+
+#### Exercice 2.3	
+
+Modifier le code ayant servi à construire le graphique p_2 pour que le type de ligne soit diﬀérent pour chacune des deux séries représentées. Les deux lignes doivent être tracées en bleu. Stocker le graphique dans un objet que l’on appellera p_3 ;
+
+```{r  ex2_3, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_3-solution}
+p_3 <- ggplot(data = df,
+              aes(x = date, y = value)) +
+  geom_line(aes(linetype = key), colour = "blue")
+
+p_3
+
+```
+
+```{r include=FALSE}
+p_3 <- ggplot(data = df,
+              aes(x = date, y = value)) +
+  geom_line(aes(linetype = key), colour = "blue")
+```
+
+#### Exercice 2.4	
+
+À présent, modifier le code ayant servi à construire p_3 pour quà la fois la couleur et le type de ligne servent à diﬀérencier les deux séries. Stocker le graphique dans un objet que l’on appellera p_4 ;
+
+```{r  ex2_4, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_4-solution}
+p_4 <- ggplot(data = df,
+              aes(x = date, y = value)) + geom_line(aes(linetype = key, colour = key))
+
+p_4
+
+```
+
+```{r include=FALSE}
+p_4 <- ggplot(data = df,
+              aes(x = date, y = value)) + geom_line(aes(linetype = key, colour = key))
+```
+
+#### Exercice 2.5	
+
+Modifier le graphique p_4 en ajoutant une couche d’échelle de couleur pour que le taux d’épargne personnelle (psavert) soit représenté en dodger blue, et que la durée de chômage (uempmed) soit représentée en rouge. De plus, retirer le titre de la légende ;
+
+```{r  ex2_5, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_5-solution}
+p_4 <-p_4 +
+  scale_colour_manual("", values = c("psavert" = "dodger blue", "uempmed" = "red"))
+
+p_4
+
+```
+
+```{r include=FALSE}
+p_4 <-p_4 +
+  scale_colour_manual("", values = c("psavert" = "dodger blue", "uempmed" = "red"))
+```
+
+#### Exercice 2.6	
+
+Modifier le graphique p_4 en ajoutant une couche d’échelle de type de ligne pour que le taux d’épargne personnelle (psavert) soit représenté par ds tirets, et que la durée de chômage (uempmed) soit représentée par une ligne pleine. De plus, retirer le titre de la légende ;
+
+```{r  ex2_6, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_6-solution}
+p_4 <-p_4 +
+  scale_linetype_manual("", values = c("psavert" = "dashed", "uempmed" = "solid"))
+
+p_4
+
+```
+
+```{r include=FALSE}
+p_4 <-p_4 +
+  scale_linetype_manual("", values = c("psavert" = "dashed", "uempmed" = "solid"))
+```
+
+#### Exercice 2.7	
+
+Créer le tableaux de données df_2, une copie de df, dans lequel la variable key doit être un facteur dont les niveaux sont uempmed et psavert ;
+
+```{r  ex2_7, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_7-solution}
+df_2 <- df %>%
+  mutate(key = factor(key, levels = c("uempmed", "psavert")))
+
+```
+
+```{r include=FALSE}
+df_2 <- df %>%
+  mutate(key = factor(key, levels = c("uempmed", "psavert")))
+```
+
+#### Exercice 2.8	
+
+Créer le vecteur etiq suivant :
+  ```{r  ex2_8, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_8-solution}
+etiq <- c("psavert" = "Pers. Saving Rate", "uempmed" = "Median Duration of Unemployment (weeks)")
+
+```
+
+```{r include=FALSE}
+etiq <- c("psavert" = "Pers. Saving Rate", "uempmed" = "Median Duration of Unemployment (weeks)")
+```
+
+Ce vecteur contient des valeurs d’étiquettes pour la légende du graphique qu’il va falloir créer. Réaliser un graphique à l’aide des données contenues dans le tableau df_2, représentant l’évolution dans le temps du taux d’épargne personnelle ainsi que l’évolution de la durée médiane du chomage en semaines. La courbe taux d’épargne personnelle doit être composée de tirets et être de couleur dodger blue ; la courbe de la durée médiane du taux de chômage doit être une ligne rouge. La légende ne doit pas comporter de titre, et ses étiquettes doivent être modifiées pour que "Pers. Saving Rate" s’aﬃche ‘a la place de "psavert", et pour que "Median Duration of Unemployment (weeks)" s’aﬃche à la place de "uempmed". Stocker le graphique dans un objet que l’on appellera p_5 ;
+
+Note : il s’agit de reprendre le code ayant servi à créer le graphique p_4, en modifiant légèrement les échelles de couleur et de ligne pour prendre en compte les étiquettes proposées dans le vecteur etiq.
+
+```{r  ex2_8_1, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_8_1-solution}
+p_5 <-ggplot(data = df_2,
+             aes(x = date, y = value)) +
+  geom_line(aes(linetype = key, colour = key)) +
+  scale_colour_manual("", values = c("psavert" = "dodger blue", "uempmed" = "red"), labels = etiq) +
+  scale_linetype_manual("", values = c("psavert" = "dashed", "uempmed" = "solid"), labels = etiq)
+
+p_5
+
+```
+
+```{r include=FALSE}
+p_5 <-ggplot(data = df_2,
+             aes(x = date, y = value)) +
+  geom_line(aes(linetype = key, colour = key)) +
+  scale_colour_manual("", values = c("psavert" = "dodger blue", "uempmed" = "red"), labels = etiq) +
+  scale_linetype_manual("", values = c("psavert" = "dashed", "uempmed" = "solid"), labels = etiq)
+```
+
+#### Exercice 2.9	
+
+Modifier p_5 pour lui ajouter une couche permettant de déplacer la légende en bas du graphique (utiliser la fonction theme()) ;
+
+```{r  ex2_9, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_9-solution}
+p_5 <-p_5 +
+  theme(legend.position = "bottom", text = element_text(size = 20))
+
+p_5
+
+
+```
+
+```{r include=FALSE}
+p_5 <-p_5 +
+  theme(legend.position = "bottom", text = element_text(size = 20))
+
+```
+
+#### Exercice 2.10 
+
+Ajouter une couche au graphique p_5 qui permet de définir un thème. Utiliser le thème minimal (theme_minimal()). Que se passe-t-il pour la légende ? Repositionner la légende en dessous, et retirer les titres des axes ;
+
+```{r  ex2_10, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2_10-solution}
+p_5 <-p_5 + theme_minimal() +
+  theme(legend.position = "bottom", text = element_text(size = 20)) + xlab("") + ylab("")
+
+p_5
+
+```
+
+```{r include=FALSE}
+p_5 <-p_5 + theme_minimal() +
+  theme(legend.position = "bottom", text = element_text(size = 20)) + xlab("") + ylab("")
+```
+
+#### Exercice 2.11	
+
+Sauvegarder le graphique p_5 au format PDF en précisant une largeur de 12 et une hauteur de 8.
+
+
+
+### Exercice 3  (Diﬀérentes représentations graphiques)
+
+Charger le jeu de données mpg contenu dans le package ggplot2 en mémoire, puis consulter la page d’aide du jeu de données pour en prendre connaissance 
+
+```{r}
+data(mpg)
+#?mpg
+
+```
+
+#### Exercice 3.1	
+
+Représenter à l’aide d’un nuage de points la relation entre la consommation sur autoroute des véhicules de l’échantillon (hwy) et la cylindrée de leur moteur (displ)
+
+```{r  ex3_1, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3_1-solution}
+ggplot(data = mpg, aes(x = hwy, y = displ)) + geom_point()
+```
+
+#### Exercice 3.2	
+
+Reprendre le code du graphique précédent et modifier la forme des points pour les changer en symbole + ; modifier la couleur des "plus" de manière à la faire dépendre du nombre de cylindres (cyl) ;
+
+```{r  ex3_2, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3_2-solution}
+ggplot(data = mpg, aes(x = hwy, y = displ)) + geom_point(aes(colour = factor(cyl)), shape = 3)
+```
+
+#### Exercice 3.3	
+
+À présent, représenter la distribution de la consommation sur autoroute des véhicules (hwy) pour chacune des valeurs possibles du nombre de cylindres (cyl) à l’aide de boîtes à moustaches ;
+```{r  ex3_3, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3_3-solution}
+ggplot(data = mpg) + geom_boxplot(aes(x = factor(cyl), y = hwy))
+```
+
+#### Exercice 3.4	
+
+Charger le jeu de données economics contenu dans le package ggplot2 en mémoire, puis consulter la page d’aide du jeu de données pour en prendre connaissance. Ensuite, ajouter au tableau les variables u_rate et e_rate, respectivement le taux de chômage et le taux d’emploi ;
+```{r  ex3_4, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3_4-solution}
+data(economics)
+economics <- economics %>%
+  mutate(u_rate = unemploy / pop,
+         e_rate = 1- u_rate)
+
+economics
+
+
+```
+
+```{r include=FALSE}
+data(economics)
+economics <- economics %>%
+  mutate(u_rate = unemploy / pop,
+         e_rate = 1- u_rate)
+
+
+```
+
+#### Exercice 3.5	
+
+Représenter à l’aide de barres l’évolution dans le temps du taux de chômage, et remplir les barres avec la couleur rouge ;
+```{r  ex3_5, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3_5-solution}
+ggplot(data = economics, aes(x = date, y = u_rate)) + geom_bar(stat = "identity", fill = "red")
+```
+
+#### Exercice 3.6	
+
+Reprendre le code du graphique précédent et ajouter une coucher permettant de modifier les limites de l’axe des abscisses pour aﬃcher les valeurs uniquement sur la période "2012-01-01" à "2015-01-01" (utiliser la fonction coord_cartesian()). Stocker le graphique dans un objet que l’on appellera p ;
+```{r  ex3_6, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3_6-solution}
+p <- ggplot(data = economics, aes(x = date, y = u_rate)) + geom_bar(stat = "identity", fill = "red") + coord_cartesian(xlim = c(as.Date("2012-01-01"),
+                                                                                                                                as.Date("2015-01-01")))
+
+p
+
+```
+
+```{r include=FALSE}
+p <- ggplot(data = economics, aes(x = date, y = u_rate)) + geom_bar(stat = "identity", fill = "red") + coord_cartesian(xlim = c(as.Date("2012-01-01"),
+                                                                                                                                as.Date("2015-01-01")))
+```
+
+#### Exercice 3.7	
+
+Dans le tableau de données economics, sélectionner les variables date, u_rate et e_rate, puis utiliser la fonction gather() pour obtenir un tableau dans lequel chaque ligne correspond à la valeur d’une des variables (taux de chômage ou taux d’emploi) à une date donnée. Stocker le résultat dans un objet que l’on appellera df_3 ;
+
+```{r  ex3_7, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3_7-solution}
+df_3 <-economics %>%
+  select(date, u_rate, e_rate) %>%
+  gather(key, value, -date)
+
+```
+
+```{r include=FALSE}
+df_3 <-economics %>%
+  select(date, u_rate, e_rate) %>%
+  gather(key, value, -date)
+
+```
+
+#### Exercice 3.8	
+
+Utiliser le tableau de données df_3 pour représenter graphiquement à l’aide de barres les taux de chômage et taux d’emploi par mois sur la période "2012-01-01" à "2015-01-01". Sur le graphique, les barres représentant le taux de chômage et celles représentant le taux d’emploi devront être superposées.
+
+Note : il s’agit de modifier légèrement le code ayant permis de réaliser le graphique p.
+
+```{r  ex3_8, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3_8-solution}
+ggplot(data = economics %>%
+         select(date, u_rate, e_rate) %>%
+         gather(key, value, -date),
+       aes(x = date, y = value)) +
+  geom_bar(stat = "identity", aes(fill = key)) + coord_cartesian(xlim = c(as.Date("2012-01-01"), as.Date("2015-01-01")))
+
+```
+
+
+### Exercice 4  (Facettes)
+
+Charger le package WDI (l’installer si nécessaire), puis en utilisant la fonction WDI(), récupérer les données de PIB par tête (NY.GDP.PCAP.PP.KD, PPP, constant 2005 international $) et de taux de chômage (SL.UEM.TOTL.ZS, total, % of total labor force) pour la France, l’Allemagne et le Royaume Uni, pour la période allant de 1990 à 2015. Ces données doivent être stockées dans un tableau que l’on appellera df ;
+
+```{r}
+library(WDI)
+
+#	NY.GDP.PCAP.PP.KD (GDP per capita, PPP (constant 2005 international $))
+#	SL.UEM.TOTL.ZS (Unemployment, total (% of total labor force))
+df <- WDI(country = c("FR", "GB", "DE"),
+          indicator = c("NY.GDP.PCAP.PP.KD", "SL.UEM.TOTL.ZS"), start = 1990, end = 2015)
+head(df)
+
+```
+
+```{r include=FALSE}
+df <- WDI(country = c("FR", "GB", "DE"),
+          indicator = c("NY.GDP.PCAP.PP.KD", "SL.UEM.TOTL.ZS"), start = 1990, end = 2015)
+```
+
+#### Exercice 4.1	
+
+Transformer le tableau df afin que chaque ligne indique : l’état (country), l’année (year), le nom de la variable (variable) et la valeur (valeur). La colonne variable doit être de type factor, et les étiquettes des variables NY.GDP.PCAP.PP.KD et SL.UEM.TOTL.ZS doivent être GDP et Unemployment respectivement ;
+
+```{r  ex4_1, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex4_1-solution}
+df <-
+  df %>%
+  select(-iso2c) %>%
+  gather(variable, valeur, NY.GDP.PCAP.PP.KD, SL.UEM.TOTL.ZS) %>% mutate(variable = factor(variable, levels = c("NY.GDP.PCAP.PP.KD", "SL.UEM.TOTL.ZS"), labels = c("GDP", "Unemployment")))
+
+```
+
+```{r include=FALSE}
+df <-
+  df %>%
+  select(-iso2c) %>%
+  gather(variable, valeur, NY.GDP.PCAP.PP.KD, SL.UEM.TOTL.ZS) %>% mutate(variable = factor(variable, levels = c("NY.GDP.PCAP.PP.KD", "SL.UEM.TOTL.ZS"), labels = c("GDP", "Unemployment")))
+
+```
+
+#### Exercice 4.2	
+
+Représenter graphiquement l’évolution du PIB et du taux de chômage pour les trois pays. Utiliser la fonction facet_wrap() afin de regrouper les variables par type de variable : les observations des valeurs du PIB d’un côté, et celles du taux de chômage de l’autre. Utiliser une représentation en ligne, en faisant dépendre la couleur du pays ;
+
+```{r  ex4_2, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex4_2-solution}
+ggplot(data = df, aes(x = year, y = valeur, colour = country)) + geom_line() +
+  facet_wrap(~variable) +
+  ylab("") + xlab("")
+
+```
+
+#### Exercice 4.3	
+
+Reprendre le code du graphique précédent en le modifiant légèrement afin de libérer les axes des ordonnées ;
+
+```{r  ex4_3, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex4_3-solution}
+ggplot(data = df, aes(x = year, y = valeur, colour = country)) + geom_line() +
+  facet_wrap(~variable, scales = "free_y") +
+  ylab("") + xlab("")
+
+```
+
+#### Exercice 4.4	
+
+Modifier les paramètres esthétiques du graphique afin de faire dépendre le type de ligne des pays de la manière suivante : des points pour la France, des tirets pour l’Allemagne, des tirets longs pour le Royaume Uni. Définir l’épaisseur des lignes à 1.5 ;
+
+```{r  ex4_4, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex4_4-solution}
+ggplot(data = df, aes(x = year, y = valeur, colour = country)) + geom_line(aes(linetype = country), size = 1.5) + scale_linetype_manual("country",
+                                                                                                                                        values = c("France" = "dotted",
+                                                                                                                                                   "Germany" = "dashed",
+                                                                                                                                                   "United Kingdom" = "longdash")) +
+  facet_wrap(~variable, scales = "free_y") +
+  ylab("") + xlab("")
+
+
+```
+
+#### Exercice 4.5	
+
+Modifier légèrement le code ayant permis de réaliser le graphique de la question précédente pour que la direction ne soit non plus horizontale (par défaut), mais verticale ;
+
+```{r  ex4_5, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex4_5-solution}
+ggplot(data = df, aes(x = year, y = valeur, colour = country)) + geom_line(aes(linetype = country), size = 1.5) + scale_linetype_manual("country",
+                                                                                                                                        values = c("France" = "dotted","Germany" = "dashed","United Kingdom" = "longdash")) +facet_wrap(~variable, scales = "free_y", dir = "v") + ylab("") + xlab("")
+
+
+```
+
+#### Exercice 4.6	
+
+En utilisant la fonction facet_wrap(), représenter chaque série dans un des panels, de sorte qu’un pannel représente l’évolution d’une série pour un pays donné ;
+
+```{r  ex4_6, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex4_6-solution}
+ggplot(data = df, aes(x = year, y = valeur)) +
+  geom_line() +
+  facet_wrap(country~variable, scales = "free_y") + ylab("") + xlab("")
+
+```
+
+#### Exercice 4.7	
+
+À présent, utiliser la fonction facet_grid() pour créer une grille de graphiques dans laquelle les lignes correspondent aux pays et les colonnes aux variables. Prendre soin de libérer les échelles ;
+
+```{r  ex4_7, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex4_7-solution}
+ggplot(data = df, aes(x = year, y = valeur)) +
+  geom_line() +
+  facet_grid(country~variable, scales = "free") + ylab("") + xlab("")
+
+
+```
+
+#### Exercice 4.8	
+
+Reprendre la question précédente en faisant cette fois une girlle dans laquelle les lignes corres-pondent aux variables et les colonnes aux pays ;
+
+```{r  ex4_8, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex4_8-solution}
+ggplot(data = df, aes(x = year, y = valeur)) +
+  geom_line() +
+  facet_grid(variable~country, scales = "free") +
+  ylab("") + xlab("")
+
+```
+
+### Exercice 5  (Annotations)
+
+En utilisant la fonction WDI() du package WDI, récupérer les séries de 2010 du PIB par tête (NY.GDP.PCAP.PP.KD, PPP, constant 2005 international $) et de l’espérance de vie à la naissance (SP.DYN.LE00.IN, total, years) pour tous les pays. Les données seront stockées dans un tableau que l’on nommera df ;
+
+```{r}
+#	NY.GDP.PCAP.PP.KD (GDP per capita, PPP (constant 2005 international $))
+#	SP.DYN.LE00.IN (Life expectancy at birth, total (years))
+df <- WDI(country = c("all"),
+          indicator = c("NY.GDP.PCAP.PP.KD", "SP.DYN.LE00.IN"), start = 2010, end = 2010)
+
+```
+
+```{r include=FALSE}
+df <- WDI(country = c("all"),
+          indicator = c("NY.GDP.PCAP.PP.KD", "SP.DYN.LE00.IN"), start = 2010, end = 2010)
+
+```
+
+#### Exercice 5.1	
+
+Représenter par un nuage de points l’espérance de vie à la naissance en fonction du PIB par tête. Retirer les titres des axes, et ajouter le titre suivant (sur deux lignes) : Life Expectancy at birth (years) VS. Real GDP per Capita (PPP, contant 2005 international $) ;
+
+```{r  ex5_1, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex5_1-solution}
+library(stringr)
+ggplot(data = df, aes(x = NY.GDP.PCAP.PP.KD, y = SP.DYN.LE00.IN)) +
+  geom_point() +
+  ggtitle(str_c("Life Expectancy at birth (years) VS.",
+                "Real GDP per Capita (PPP, contant 2005 international $)", sep = "\n")) + xlab("") + ylab("")
+
+```
+
+#### Exercice 5.2	
+
+Ajouter une courbe de tendance obtenue par lissage Loess (en utilisant une fonction du package ggplot2) ;
+
+```{r  ex5_2, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex5_2-solution}
+ggplot(data = df, aes(x = NY.GDP.PCAP.PP.KD, y = SP.DYN.LE00.IN)) + geom_point() +
+  ggtitle(str_c("Life Expectancy at birth (years) VS.",
+                "Real GDP per Capita (PPP, contant 2005 international $)", sep = "\n")) + xlab("") + ylab("") +
+  geom_smooth()
+
+```
+
+#### Exercice 5.3	
+
+Modifier le tableau df pour lui ajouter la variable drapeau qui prendra la valeur TRUE si l’état de l’observation est soit France, soit Luxembourg, et FAUX sinon ;
+
+```{r  ex5_3, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex5_3-solution}
+df <-df %>%
+  mutate(drapeau = ifelse(country %in% c("France", "Luxembourg"), yes = TRUE, no = FALSE))
+
+
+```
+
+```{r include=FALSE}
+df <-df %>%
+  mutate(drapeau = ifelse(country %in% c("France", "Luxembourg"), yes = TRUE, no = FALSE))
+```
+
+#### Exercice 5.4	
+
+Modifier légèrement le code ayant permis de réaliser le précédent graphique, pour faire dépendre la couleur des points de la variable drapeau (rouge pour TRUE et noir pour FALSE) ;
+
+```{r  ex5_4, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex5_4-solution}
+ggplot(data = df, aes(x = NY.GDP.PCAP.PP.KD, y = SP.DYN.LE00.IN)) + ggtitle(str_c("Life Expectancy at birth (years) VS.",
+                                                                                  "Real GDP per Capita (PPP, contant 2005 international $)", sep = "\n")) + xlab("") + ylab("") +
+  scale_colour_manual("", values = c("TRUE" = "red", "FALSE" = "Black")) + guides(colour = FALSE) +
+  geom_smooth() +
+  geom_point(aes(colour = drapeau))
+
+```
+
+#### Exercice 5.5	
+
+Créer un tableau de données que l’on appellera df_fleche qui contient les observations du tableau df pour la France et le Luxembourg uniquement ;
+
+```{r  ex5_5, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex5_5-solution}
+df_fleches <- df %>%
+  filter(country %in% c("France", "Luxembourg"))
+
+```
+
+```{r include=FALSE}
+df_fleches <- df %>%
+  filter(country %in% c("France", "Luxembourg"))
+```
+
+
+#### Exercice 5.6	
+
+Reprendre le code du graphique précédent pour le modifier de façon à ajouter deux flèches : l’une montrant le points de la France et l’autre du Luxembourg. Le nom du pays devra être inscrit à l’origine des deux flèches (utiliser la fonction annotate() et se servir du tableau de données df_fleche) ;
+
+```{r  ex5_6, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex5_6-solution}
+library(grid)
+
+
+ggplot(data = df, aes(x = NY.GDP.PCAP.PP.KD, y = SP.DYN.LE00.IN)) +
+  ggtitle(str_c("Life Expectancy at birth (years) VS.",
+                "Real GDP per Capita (PPP, contant 2005 international $)", sep = "\n")) + xlab("")+
+  ylab("") +
+  scale_colour_manual("", values = c("TRUE" = "red", "FALSE" = "Black")) + guides(colour = FALSE) +
+  geom_smooth() +
+  geom_point(aes(colour = drapeau)) +
+  annotate(geom = "segment",
+           x = df_fleches$NY.GDP.PCAP.PP.KD + 1e4,
+           xend = df_fleches$NY.GDP.PCAP.PP.KD,
+           y = df_fleches$SP.DYN.LE00 - 10,
+           yend = df_fleches$SP.DYN.LE00,
+           arrow = arrow(length = unit(0.5, "cm")), colour = "red") + 
+  annotate(geom = "text",
+           x = df_fleches$NY.GDP.PCAP.PP.KD + 1e4,
+           y = df_fleches$SP.DYN.LE00 - 11,
+           label = df_fleches$country, colour = "red")
+
+```
+
+### Exercice 6  (Annotations)
+
+À l’aide de la fonction WDI du package WDI, récupérer la série de l’inflation (FP.CPI.TOTL.ZG, consumer prices, annual %) en France sur la période 1960–2015, et stocker ces données dans un tableau que l’on appellera inflation_fr ;
+
+```{r}
+# FP.CPI.TOTL.ZG (Inflation, consumer prices (annual %)) 
+inflation_fr <- WDI(country = "FR", indicator = "FP.CPI.TOTL.ZG",
+                    start = 1960, end = 2015)
+
+```
+
+```{r include=FALSE}
+inflation_fr <- WDI(country = "FR", indicator = "FP.CPI.TOTL.ZG",
+                    start = 1960, end = 2015)
+```
+
+#### Exercice 6.1	
+
+Représenter par une ligne l’évolution du taux annuel d’inflation en France sur la période 1960–2015. Retirer les titres d’axes et ajouter le titre suivant : Inflation in France (annual %) ;
+
+```{r  ex6_1, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex6_1-solution}
+p <- ggplot(data = inflation_fr, aes(x = year, y = FP.CPI.TOTL.ZG)) + geom_line() + xlab("") + ylab("") +
+  ggtitle("Inflation in France (annual %)")
+
+```
+
+```{r include=FALSE}
+p <- ggplot(data = inflation_fr, aes(x = year, y = FP.CPI.TOTL.ZG)) + geom_line() + xlab("") + ylab("") +
+  ggtitle("Inflation in France (annual %)")
+```
+
+#### Exercice 6.2	
+
+Soient les deux vecteurs suivants, qui définissent les dates de début et fin de la période inflationniste et celle de grande modération :
+  
+  ```{r}
+per_1 = c(1970, 1976) # Periode inflationniste
+per_2 = c(1976, 1991) # Periode de grande moderation
+
+```
+
+```{r include=FALSE}
+per_1 = c(1970, 1976) # Periode inflationniste
+per_2 = c(1976, 1991) # Periode de grande moderation
+
+```
+
+Reprendre le code du graphique précédent et ajouter deux rectangles : un premier, rouge, pour mettre en valeur la période inflationniste et un second, bleu, mettant en valeur la période de grande modération. Modifier le paramètre de transperence pour le fixer à 0.2 ;
+
+```{r  ex6_2, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex6_2-solution}
+p	<-p +
+  annotate(geom = "rect", xmin = per_2[1],xmax = per_2[2], ymin = -Inf, ymax = Inf,
+           alpha = .2, fill = "blue") +
+  
+  annotate(geom = "rect", xmin = per_1[1], xmax = per_1[2], ymin = -Inf, ymax = Inf,
+           alpha = .2, fill = "red")
+
+```
+
+```{r include=FALSE}
+p	<-p +
+  annotate(geom = "rect", xmin = per_2[1],xmax = per_2[2], ymin = -Inf, ymax = Inf,
+           alpha = .2, fill = "blue") +
+  
+  annotate(geom = "rect", xmin = per_1[1], xmax = per_1[2], ymin = -Inf, ymax = Inf,
+           alpha = .2, fill = "red")
+```
+
+#### Exercice 6.3	
+
+Ajouter au graphique précédent des lignes grises verticales en tirets pour les années 1973, 1979 et 2008. Modifier également les breaks de l’échelle des abscisses à l’aide d ela fonction pretty_breaks() du package scales ;
+
+```{r  ex6_3, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex6_3-solution}
+library(scales)
+
+p	+
+  geom_vline(xintercept = c(1973,1979, 2008),
+             col = "grey40", linetype = "dashed", size = 0.9)+
+  scale_x_continuous(breaks = pretty_breaks(n=10))
+
+```
+

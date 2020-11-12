@@ -1,0 +1,16 @@
+Package: VisuR
+Type: Package
+Title: Supports de formation Visualisation sur R
+Version: 0.1.0
+Authors@R: person("Arnaud", "Milet", email = "arnaud.milet@d-sidd.com", role = c("aut", "cre"))
+Description: Package contenant l'ensemble des supports à la formation Visualisation sur R
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 2.10)
+Imports:
+        leaflet,sf,units,osmdata,treemap,d3treeR,collapsibleTree,waffle,grid,gridExtra,ggplot2,tidyverse,extrafont,tm,SnowballC,wordcloud,RColorBrewer,FactoMineR,factoextra,scales,cowplot,lubridate,WDI,rworldmap,ggrepel,readxl
+NeedsCompilation: no
+Packaged: 2020-10-05 19:53:56 UTC; Arnaud
+Author: Arnaud Milet [aut, cre]
+Maintainer: Arnaud Milet <arnaud.milet@d-sidd.com>

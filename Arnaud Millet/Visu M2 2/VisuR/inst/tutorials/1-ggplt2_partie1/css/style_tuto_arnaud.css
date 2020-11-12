@@ -1,0 +1,6 @@
+.topicsFooter:after{ 
+  content:url(https://i.creativecommons.org/l/by-nc-sa/3.0/fr/88x31.png) ;
+  float: left;
+  width: 100%;
+  margin-top: 20px;
+}

@@ -1,0 +1,359 @@
+---
+title: "Logiciel R"
+subtitle: Visualisation sur R - Découverte de ggplot2
+author: "Arnaud MILET - arnaud.milet@d-sidd.com"
+output: 
+  learnr::tutorial:
+    css: css/style_tuto_arnaud.css
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(grid)
+library(gridExtra)
+library(ggplot2)
+dsmall <- diamonds[sample(nrow(diamonds), 100), ]
+
+```
+
+## ggplot2, c'est quoi?
+
+* Une implementation de Grammar of Graphics de Leland Wilkinson
+* Rédigé par Hadley Wickham 
+* Un 3^ème^ package de R dédié aux graphiques (avec base et lattice) 
+* Disponible sur le site du CRAN via install.packages() 
+* Un site web de référence: http://ggplot2.tidyverse.org/index.html
+
+
+## Grammar of Graphics
+
+*"En bref, la grammaire nous dit qu'un graphique est une cartographie de données à travers des géométries (des points, des lignes, des barres, ...) ayant des attributs (la couleur, la forme, la taille, ...). Les données du graphique peuvent aussi être transformées et ainsi être projetées sur un nouveau système de coordonnées."*
+
+__Traduit de : ggplot2-book de Hadley Wickham__:
+https://github.com/hadley/ggplot2-book
+http://ggplot2.org/book/
+
+
+## Quelles est la différence avec Base et Lattice
+
+### Base
+
+Sur Base un graphique est créé en 2/3 étapes à partir d'un fond blanc: 
+1.  On créé le graphique qui nous interesse
+2.  On ajoute les annotations
+
+* *Le plus*:
+  C'est pratique, on applique directement la fonction que l'on recherche sur les données que l'on veut traiter. 
+* *Les moins*: 
+    + On ne peut pas revenir en arrière. 
+    + Ne correspond à aucun autre langage.
+
+
+### Lattice
+
+Sur Lattice, les graphiques sont créé à partir de fonctions uniques (xyplot, bwplot, etc.)
+
+* *Les plus*:
+    + Il est plus pratique que Base pour visualiser 3 dimensions par exemple: Regarder comment y change avec x à travers les niveaux de z 
+    + Les ajustements d'espaces ou de marges se font automatiquement. 
+    + Adapté pour mettre plusieurs graphiques sur une même fenêtre.
+
+* *Les moins*: 
+     +  Il peut être compliqué de spécifier l'ensemble des arguments dans une seule fonction  
+     +  L'ajout d'annotations n'est pas simple. 
+     +  On ne peut pas revenir en arrière. 
+
+### ggplot2
+
+* *Les plus*:
+    + Pratique pour visualiser 3 dimensions par exemple: Regarder comment y change avec x à travers les niveaux de z 
+    + On peut revenir en arrière. 
+    + On peut personnaliser à volonté
+    + Les outils interactifs offre une évolution possible 
+    + Existence de nombreuses extensions
+    
+## La fonction qplot() comme quick plot
+
+Pour réaliser des graphique de base, la fonction qplot() du package ggplot2 peut suffire. Cependant les possibilités de personnalisation sont limitées.
+
+```{r qplot, exercise = TRUE, exercise.eval = FALSE}
+qplot(carat, price, data = diamonds)
+```
+
+
+
+Si une seule variable est précisée, qplot() réalisera un histogramme.
+
+```{r qplot2, exercise = TRUE, exercise.eval = FALSE}
+qplot(carat, data = diamonds)
+```
+
+
+
+### Changer quelques attributs esthétiques (couleur, taille ou forme)
+
+```{r aes_couleur, exercise = TRUE, exercise.eval = FALSE}
+dsmall <- diamonds[sample(nrow(diamonds), 100), ]
+#La couleur
+qplot(carat, price, data = dsmall, colour = color)
+```
+
+
+
+```{r aes_forme, exercise = TRUE, exercise.eval = FALSE}
+#la forme
+qplot(carat, price, data = dsmall, shape = cut)
+```
+
+
+
+```{r aes_taille, exercise = TRUE, exercise.eval = FALSE}
+#la taille
+qplot(carat, price, data = dsmall, size = cut)
+```
+
+
+
+### Produire différents types de graphiques:
+qqplot ne se limite pas aux nuages de points et permet de produire toutes sortes de graphiques grâce à l'argument geom. Geom est donc l'abbréviation de geometry. cela décrit la forme sous laquelle nous souhaitons visualiser nos données.
+
+*geom = "point"* dessine un nuage de points. Il s'agit de la géométrie par défaut quand on declare les arguments x et y. 
+
+```{r geom_point, exercise = TRUE, exercise.eval = FALSE}
+qplot(carat, price, data = dsmall, geom="point")
+```
+
+*geom = "smooth"* pour visualiser les valeurs prédites d'un modele et l'écart-type 
+
+```{r geom_smooth, exercise = TRUE, exercise.eval = FALSE}
+qplot(carat, price, data = dsmall, geom="smooth")
+```
+
+
+*geom = "boxplot"* 
+
+```{r geom_boxplot, exercise = TRUE, exercise.eval = FALSE}
+qplot(cut, price, data = dsmall, geom="boxplot")
+```
+
+
+*geom = "path"* et *geom = "line"* pour dessiner des lignes entre les points: 
+
+```{r geom_path, exercise = TRUE, exercise.eval = FALSE}
+#path
+qplot(carat, price, data = dsmall, geom="path")
+```
+
+
+
+```{r geom_line, exercise = TRUE, exercise.eval = FALSE}
+#line
+qplot(carat, price, data = dsmall, geom="line")
+```
+
+
+Pour l'analyse de variables continues, nous pouvons utiliser les géométries suivantes:  
+
+*geom = "histogram"* 
+
+```{r geom_histo, exercise = TRUE, exercise.eval = FALSE}
+qplot(price, data = dsmall, geom="histogram")
+```
+
+
+*geom ="freqpoly"*  
+
+```{r geom_freqpoly, exercise = TRUE, exercise.eval = FALSE}
+qplot(price, data = dsmall, geom="freqpoly")
+```
+
+
+
+*geom = "density"* pour dessiner un graphique de densité. 
+
+```{r geom_density, exercise = TRUE, exercise.eval = FALSE}
+qplot(price, data = dsmall, geom="density")
+```
+
+
+
+Pour l'analyse de variables discretes, nous pouvons utiliser *geom = "bar"* qui dessine un diagramme en baton.
+
+
+```{r geoml_bar, exercise = TRUE, exercise.eval = FALSE}
+qplot(cut, data = dsmall, geom="bar")
+```
+
+
+### Superposer une courbe de tendance sur un nuage de points:
+
+L'ajout de la géométrie smooth permet de visualiser rapidement un tendance qui se dégage.
+
+```{r geom_multi, exercise = TRUE, exercise.eval = FALSE}
+qplot(carat, price, data = diamonds, geom = c("point", "smooth"))
+```
+
+
+
+### Boxplot et jitter
+
+Les boxplots et jitter sont très utiles pour visualiser la distribution d'une variable continue en fonction de variables discrètes: 
+
+```{r geom_jitter, exercise = TRUE, exercise.eval = FALSE}
+g1<-qplot(color, price / carat, data = diamonds, geom = "boxplot")
+g2<-qplot(color, price / carat, data = diamonds, geom = "jitter")
+grid.arrange(g1,g2,ncol=2,nrow=1)
+
+```
+
+
+
+### Jouer avec la transparence
+
+Pour apprécier la distribution, on peut aussi faire varier la transparence. Par défaut, il n'y a pas de transparence. Le paramètre alpha vaut 1. En le fixant à 1/5 (20%), il 'y aura aucune transparence si on empile 5 points. A 1/50, il faudra 50 points empilés et 200 pour 1/200.
+
+```{r transparence, exercise = TRUE, exercise.eval = FALSE}
+g1<-qplot(color, price / carat, data = diamonds, geom = "jitter",
+alpha = I(1 / 5))
+g2<-qplot(color, price / carat, data = diamonds, geom = "jitter",
+alpha = I(1 / 50))
+g3<-qplot(color, price / carat, data = diamonds, geom = "jitter",
+alpha = I(1 / 200))
+grid.arrange(g1,g2,g3,ncol=3,nrow=1)
+
+```
+
+
+
+### Histogramme et graphe de densité
+
+Les histogrammes et graphe de densité sont utiles pour visualiser la distribution d'une variable.
+
+```{r geom_histo2, exercise = TRUE, exercise.eval = FALSE}
+g1<-qplot(carat, data = diamonds, geom = "histogram")
+g2<-qplot(carat, data = diamonds, geom = "density")
+grid.arrange(g1,g2,ncol=2,nrow=1)
+```
+
+
+
+### Fixer la taille des intervalles d'un histogramme avec binwidth
+
+```{r binwidth, exercise = TRUE, exercise.eval = FALSE}
+g1<-qplot(carat, data = diamonds, geom = "histogram", binwidth = 1,
+xlim = c(0,3))
+g2<-qplot(carat, data = diamonds, geom = "histogram", binwidth = 0.1,
+xlim = c(0,3))
+g3<-qplot(carat, data = diamonds, geom = "histogram", binwidth = 0.01,
+xlim = c(0,3))
+
+grid.arrange(g1,g2,g3,ncol=3,nrow=1)
+
+```
+
+
+
+### Comparer la distribution de sous-groupe
+
+```{r distri, exercise = TRUE, exercise.eval = FALSE}
+g1<-qplot(carat, data = diamonds, geom = "density", colour = color)
+g2<-qplot(carat, data = diamonds, geom = "histogram", fill = color)
+
+grid.arrange(g1,g2,ncol=2,nrow=1)
+
+```
+
+
+
+### Series temporelles
+
+```{r series, exercise = TRUE, exercise.eval = FALSE}
+g1<-qplot(date, unemploy / pop, data = economics, geom = "line")
+g2<-qplot(date, uempmed, data = economics, geom = "line")
+
+grid.arrange(g1,g2,ncol=2,nrow=1)
+
+```
+
+
+### Graphes multiples: faceting
+
+```{r facet, exercise = TRUE, exercise.eval = FALSE}
+g1<-qplot(carat, data = diamonds, facets = color ~ .,
+geom = "histogram", binwidth = 0.1, xlim = c(0, 3))
+g2<-qplot(carat, ..density.., data = diamonds, facets = color ~ .,
+geom = "histogram", binwidth = 0.1, xlim = c(0, 3))
+
+grid.arrange(g1,g2,ncol=2,nrow=1)
+
+```
+
+## Exercices 
+
+Reproduire les graphiques suivants
+
+### Graphique 1, données=diamonds:
+
+```{r echo=FALSE, warning=FALSE,error=FALSE,message=FALSE}
+qplot(carat, price, data = diamonds, geom=c("point", "smooth"), alpha=I(1/5))
+```
+
+```{r ex1, exercise = TRUE, exercise.eval = FALSE}
+
+```
+
+
+```{r ex1-solution}
+qplot(carat, price, data = diamonds, geom=c("point", "smooth"), alpha=I(1/5))
+```
+
+### Graphique 2, données=diamonds:
+
+```{r echo=FALSE, warning=FALSE,error=FALSE,message=FALSE}
+qplot(carat, data = diamonds, geom = "histogram",
+binwidth = 0.01, xlim = c(0,3),
+col="red", main="Histogramme avec un largeur de section de 0.01")
+
+```
+
+```{r  ex2, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex2-solution}
+qplot(carat, data = diamonds, geom = "histogram",
+binwidth = 0.01, xlim = c(0,3),
+col="red", main="Histogramme avec un largeur de section de 0.01")
+```
+
+### Graphique 3, données=mpg:
+
+```{r echo=FALSE, warning=FALSE,error=FALSE,message=FALSE}
+qplot(displ, hwy, data=mpg, geom = c("point", "smooth"), facets= .~ year)
+```
+
+```{r  ex3, exercise = TRUE, exercise.eval = FALSE,echo=FALSE}
+
+```
+
+
+```{r ex3-solution}
+qplot(displ, hwy, data=mpg, geom = c("point", "smooth"), facets= .~ year)
+```
+
+## Sources
+
+https://www.r-graph-gallery.com
+http://larmarange.github.io/analyse-R/intro-ggplot2.html
+http://r4ds.had.co.nz/graphics-for-communication.html
+http://www.ggplot2-exts.org
+http://ggplot2.tidyverse.org/index.html
+http://perso.ens-lyon.fr/lise.vaudor/Supports_formation/Graphiques_ggplot2.html
+https://www.tutorialgateway.org/lattice-scatter-plot-in-r/
+http://ggplot2.org/book/qplot.pdf
+https://github.com/hadley/ggplot2-book/blob/master/ggplot.rmd
+http://egallic.fr/Enseignement/R/Slides/graphiques.html

@@ -1,0 +1,55 @@
+---
+title: "Logiciel R"
+subtitle: Visualisation sur R - Quelques extensions de ggplot2
+author: "Arnaud MILET - arnaud.milet@d-sidd.com"
+output: 
+  learnr::tutorial:
+    css: css/style_tuto_arnaud.css
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE, warning=FALSE,message=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,warning = F,error = F)
+library(ggplot2)
+
+```
+
+## quelques extensions
+
+http://www.ggplot2-exts.org/gallery/
+
+## Analyse factorielle
+
+```{r facto, exercise = TRUE, exercise.eval = FALSE}
+library(ggplot2)
+#Dendrogramme
+library(FactoMineR)
+library(factoextra)
+# 1. ACP 
+res.pca <- PCA(USArrests, ncp = 3, graph = FALSE)
+# 2. HCPC
+res.hcpc <- HCPC(res.pca, graph = FALSE)
+
+#Visualiser le dendrogramme généré par la classification. Fonction R: fviz_dend() [factoextra]:
+  
+fviz_dend(res.hcpc, 
+          cex = 0.7,                     # Taille du text
+          palette = "jco",               # Palette de couleur ?ggpubr::ggpar
+          rect = TRUE, rect_fill = TRUE, # Rectangle autour des groupes
+          rect_border = "jco",           # Couleur du rectangle
+          labels_track_height = 0.8      # Augment l'espace pour le texte
+)
+
+#Visualiser les individus et colorer par groupes. Fonction R: fviz_cluster() [factoextra].
+
+fviz_cluster(res.hcpc,
+             repel = TRUE,            # Evite le chevauchement des textes
+             show.clust.cent = TRUE, # Montre le centre des clusters
+             palette = "jco",         # Palette de couleurs, voir ?ggpubr::ggpar
+             ggtheme = theme_minimal(),
+             main = "Factor map"
+)
+
+```
+

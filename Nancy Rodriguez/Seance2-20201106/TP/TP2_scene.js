@@ -137,7 +137,7 @@
         var whiteCup = scene.getObjectByName("whiteCup", true);
         if (whiteCup)
             whiteCup.rotation.y += angle;
-        var angle = -0.1;
+        angle = -0.1;
         var blackCup = scene.getObjectByName("blackCup", true);
         if (blackCup)
             blackCup.rotation.y += angle;

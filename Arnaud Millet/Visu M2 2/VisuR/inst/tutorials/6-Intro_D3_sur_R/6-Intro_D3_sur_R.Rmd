@@ -1,0 +1,130 @@
+---
+title: "Logiciel R"
+subtitle: Visualisation sur R - Introduction à D3 sur R
+author: "Arnaud MILET - arnaud.milet@d-sidd.com"
+output: 
+  learnr::tutorial:
+    css: css/style_tuto_arnaud.css
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE, warning=FALSE,message=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,warning = F,error = F)
+
+library(treemap)
+library(d3treeR)
+library(collapsibleTree)
+```
+
+## Quelques packages nécéssaires
+
+* treemap  
+* d3treeR : remotes::install_github("d3treeR/d3treeR")
+* collapsibleTree 
+
+
+## Les données
+
+Pour représenter nos données sous forme d'arbre, on peut passer par treemap pour créer la structure de notre représentation. treemap renvoie une list et prend comme argument: 
+
+* index: Variables qui spécifient l'odre d'agrégation des éléments  
+* vSize: Variable qui détermine la taille des rectangles représentés
+* vColor: Variable qui détermine la couleur des rectangles représentés  
+
+```{r gini, exercise = TRUE, exercise.eval = FALSE}
+data(GNI2014)
+Arbre<-treemap(
+    GNI2014
+    ,index=c("continent", "iso3")
+    ,vSize="population"
+    ,vColor="GNI"
+    ,type="value"
+  )
+```
+
+```{r include=FALSE}
+data(GNI2014)
+Arbre<-treemap(
+    GNI2014
+    ,index=c("continent", "iso3")
+    ,vSize="population"
+    ,vColor="GNI"
+    ,type="value"
+  )
+
+```
+
+
+## Visualisation interactive de l'arborescence
+
+Installer le package d3treeR: 
+```{r, eval=F}
+devtools::install_github("timelyportfolio/d3treeR")
+
+```
+
+
+```{r arbre, exercise = TRUE, exercise.eval = FALSE}
+d3tree2(
+Arbre
+  , rootname = "World"
+)
+
+```
+
+
+## Collapsible tree
+
+
+Installer le package collapsibleTree: 
+```{r, eval=F}
+devtools::install_github("AdeelK93/collapsibleTree")
+
+```
+
+```{r collapsibletree, exercise = TRUE, exercise.eval = FALSE}
+library(collapsibleTree)
+# Create a simple org chart
+org <- data.frame(
+  Manager = c(
+    NA, "Ana", "Ana", "Bill", "Bill", "Bill", "Claudette", "Claudette", "Danny",
+    "Fred", "Fred", "Grace", "Larry", "Larry", "Nicholas", "Nicholas"
+  ),
+  Employee = c(
+    "Ana", "Bill", "Larry", "Claudette", "Danny", "Erika", "Fred", "Grace",
+    "Henri", "Ida", "Joaquin", "Kate", "Mindy", "Nicholas", "Odette", "Peter"
+  ),
+  Title = c(
+    "President", "VP Operations", "VP Finance", "Director", "Director", "Scientist",
+    "Manager", "Manager", "Jr Scientist", "Operator", "Operator", "Associate",
+    "Analyst", "Director", "Accountant", "Accountant"
+  )
+)
+
+# Add in colors and sizes
+org$Color <- org$Title
+levels(org$Color) <- colorspace::rainbow_hcl(11)
+
+# Use unsplash api to add in random photos to tooltip
+org$tooltip <- paste0(
+  org$Employee,
+  "<br>Title: ",
+  org$Title,
+  "<br><img src='https://source.unsplash.com/collection/385548/150x100'>"
+)
+
+collapsibleTree(
+  org,
+  attribute = "Title",
+  fill = "Color",
+  nodeSize = "leafCount",
+  tooltipHtml = "tooltip"
+)
+```
+
+## Pour aller plus loin:
+
+* [D3JS](https://d3js.org/) 
+* [collapsibleTree ](https://github.com/AdeelK93/collapsibleTree) 
+* [r2d3: R Interface to D3 Visualizations](https://rstudio.github.io/r2d3/index.html)

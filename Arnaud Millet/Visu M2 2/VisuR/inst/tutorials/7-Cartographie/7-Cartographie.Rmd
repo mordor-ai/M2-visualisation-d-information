@@ -1,0 +1,295 @@
+---
+title: "Logiciel R"
+subtitle: Visualisation sur R - Cartographie et leaflet avec R
+author: "Arnaud MILET - arnaud.milet@d-sidd.com"
+output: 
+  learnr::tutorial:
+    css: css/style_tuto_arnaud.css
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE, warning=FALSE,message=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,warning = F,error = F)
+library(leaflet)
+library(sf)
+library(units)
+library(sf)
+library(osmdata)
+```
+
+## Quelques packages nécéssaires
+
+* leaflet 
+* sf  
+
+## Votre première carte
+
+```{r premiere, exercise = TRUE, exercise.eval = FALSE}
+library(leaflet)
+Ma_carte <- leaflet() %>% 
+  addTiles()
+Ma_carte
+```
+
+```{r include=FALSE}
+Ma_carte <- leaflet() %>% 
+  addTiles()
+```
+
+## Ajouter un marqueur (marker)
+
+```{r marqueur, exercise = TRUE, exercise.eval = FALSE}
+m <- leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=3.868709, lat=43.633497)
+m 
+
+```
+
+```{r include=FALSE}
+m <- leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=3.868709, lat=43.633497)
+```
+
+
+## Ajouter des marqueurs (marker)
+
+```{r marqueurs, exercise = TRUE, exercise.eval = FALSE}
+data(quakes)
+
+leaflet(data = quakes[1:20,]) %>% addTiles() %>%
+  addMarkers(~long, ~lat, popup = ~as.character(mag), label = ~as.character(mag))
+
+```
+
+
+## Regrouper les marqueurs (marker)
+
+```{r group_marqueurs, exercise = TRUE, exercise.eval = FALSE}
+data(quakes)
+
+leaflet(quakes) %>% addTiles() %>% addMarkers(
+  clusterOptions = markerClusterOptions()
+)
+```
+
+
+
+## Personnaliser les marqueurs
+
+```{r perso_marqueurs, exercise = TRUE, exercise.eval = FALSE}
+MasterMIASHS_Icon <- makeIcon(
+  iconUrl = "images/logo.png",
+  iconWidth = 50, iconHeight = 50
+)
+
+
+leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=3.868709, lat=43.633497, popup="Big brother is watching you",icon = MasterMIASHS_Icon)
+
+```
+
+```{r include=FALSE}
+MasterMIASHS_Icon <- makeIcon(
+  iconUrl = "images/logo.png",
+  iconWidth = 50, iconHeight = 50
+)
+```
+
+## Ajouter une fenetre popup
+
+```{r popup, exercise = TRUE, exercise.eval = FALSE}
+m <- leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=3.868709, lat=43.633497, icon = MasterMIASHS_Icon,popup="Big brother is watching you")
+m 
+
+```
+
+## Ajouter plusieurs fenetres popup
+
+```{r popups, exercise = TRUE, exercise.eval = FALSE}
+data(quakes)
+
+leaflet(data = quakes[1:20,]) %>% addTiles() %>%
+  addMarkers(~long, ~lat, popup = ~as.character(mag))
+
+```
+
+## Changer les fonds de cartes
+
+```{r fonds, exercise = TRUE, exercise.eval = FALSE}
+m <- leaflet() %>% setView(lng=3.868709, lat=43.633497, zoom = 12)
+m %>% addTiles()
+
+#addProviderTiles() pour choisir d'autres fonds parmi 137
+
+m %>% addProviderTiles(providers$Stamen.Toner)
+
+m %>% addProviderTiles(providers$Stamen.Watercolor)
+
+```
+
+
+## Les différentes couches sur une carte
+
+* Polygone: addPolygons() 
+* Cercle: addCircleMarkers()
+* Légende: addlegend()  
+...
+
+## Importer des données
+
+On se focalisera sur 4 types de données:  
+
+* CSV (avec colonne lat/lon ou geometrie)
+* Shapefile 
+* geojson 
+* OpenStreetMap
+
+
+### CSV
+
+
+```{r csv, exercise = TRUE, exercise.eval = FALSE}
+chemin_fichier <- system.file("extdata", "Structures_Accompagnement.csv", package = "VisuR")
+
+Structures_Accompagnement_3M <- read.csv2(chemin_fichier)
+
+Structures_Accompagnement_3M_sf = Structures_Accompagnement_3M%>%
+  st_as_sf(coords = c("longitude", "latitude"), 
+                 crs = 4326, agr = "constant")
+
+leaflet(data = Structures_Accompagnement_3M_sf) %>% addTiles() %>%
+  addCircleMarkers(popup = ~nom, color = "magenta")%>%
+  addProviderTiles(providers$Stamen.Toner)%>%
+  addMarkers(lng=3.868709, lat=43.633497, popup="Big brother is watching you",icon = MasterMIASHS_Icon)
+```
+
+
+### Shapefile
+
+```{r shp, exercise = TRUE, exercise.eval = FALSE}
+
+chemin_fichier <- system.file("extdata", "MMM_MMM_Limites.shp", package = "VisuR")
+
+Communes<-read_sf(chemin_fichier)
+
+leaflet(data = Structures_Accompagnement_3M_sf) %>% addTiles() %>%
+  addPolygons(data=Communes%>%
+  st_as_sf()%>%
+  st_transform(crs=4326),
+   fillOpacity=0,color="navy"
+)
+
+
+```
+
+
+### geojson
+```{r geojson, exercise = TRUE, exercise.eval = FALSE}
+BureauVote<-read_sf("https://data.montpellier3m.fr/sites/default/files/ressources/VilleMTP_MTP_BureauxVote.geojson")
+
+leaflet(data=BureauVote) %>% addTiles() %>%
+  addPolygons()
+```
+
+
+
+### Openstreetmap
+
+Le code suivant est issu du travail de Thimothé Giraud permettant de visualiser la densité de bars à proximité des stations de métro parisiennes. Plus de détails [ici](https://rcarto.github.io/caRtosm/)
+
+
+```{r osm, exercise = TRUE, exercise.eval = FALSE}
+library(units)
+library(sf)
+library(osmdata)
+
+# define a bounding box
+q0 <- opq(bbox = c(2.2247, 48.8188, 2.4611, 48.9019)) 
+
+# extract Paris boundaries
+q1 <- add_osm_feature(opq = q0, key = 'name', value = "Paris")
+res1 <- osmdata_sf(q1)
+paris <- st_geometry(res1$osm_multipolygons[1,])
+
+
+# extract Bars & Pubs
+q6 <- add_osm_feature(opq = q0, key = 'amenity', value = "bar")
+res6 <- osmdata_sf(q6)
+bar <- res6$osm_points
+q7 <- add_osm_feature(opq = q0, key = 'amenity', value = "pub")
+res7 <- osmdata_sf(q7)
+pub <- res7$osm_points
+
+# extract Metro stations
+q8 <- add_osm_feature(opq = q0, key = 'station', value = "subway")
+res8 <- osmdata_sf(q8)
+metro <- res8$osm_points
+
+# use Lambert 93 projection (the french cartographic projection) for all layers
+bar <- st_transform(bar, 2154)
+pub <- st_transform(pub, 2154)
+metro <- st_transform(metro, 2154)
+paris <- st_transform(paris, 2154)
+
+# make layers pretty
+## We only keep the bars and pubs within Paris boundaries
+bar <- bar[!is.na(bar$name),]
+pub <- pub[!is.na(pub$name),]
+bars <- c(st_geometry(bar), st_geometry(pub))
+bars <- st_intersection(x = bars, y = paris)
+
+## We only keep subway station within Paris boundaries
+metro <- st_intersection(x = metro, y = paris)
+metro <- metro[metro$station%in%"subway", ]
+metro <- metro[metro$railway%in%"station",]
+
+
+# distance between all stations
+mat <- st_distance(metro, metro)
+diag(mat) <- 10000
+# distance to the nearest station
+dmin <- apply(mat, 2, min)
+# mean minimum distance 
+(meandmin <- mean(dmin))
+
+# count the number of bars within this distance for each subway station
+metro$nbar <- lengths(st_covers(st_buffer(x = metro, dist = meandmin), bars))
+
+library(leaflet)
+# transform to lon/lat projection WGS84
+metrounp <- st_transform(metro, 4326)
+# order the table to have greater circles below smaller ones
+metrounp <- metrounp[order(metrounp$nbar, decreasing = T),]
+# compute the radii of the circles
+metrounp$size <- sqrt(metrounp$nbar*15 / pi)
+# create a label
+metrounp$label <- paste0("<b>", metrounp$name, "</b> <br>", 
+                         metrounp$nbar," bars nearby.")
+# create the interactive map...
+m <- leaflet(padding = 0)
+m <- addTiles(m)
+m <- addCircleMarkers(map = m, 
+                      lng = st_coordinates(metrounp)[,1], 
+                      lat = st_coordinates(metrounp)[,2], 
+                      radius = metrounp$size, weight = 0.25, 
+                      stroke = T, opacity = 100,
+                      fill = T, fillColor = "#920000", 
+                      fillOpacity = 100,
+                      popup = metrounp$label,
+                      color = "white")
+# ... and display it
+m
+
+```
+
+## Pour aller plus loin:
+
+* [Simple Features for R](https://r-spatial.github.io/sf/index.html)  
+* [The Johns Hopkins Data Science Lab](https://github.com/DataScienceSpecialization/Developing_Data_Products/blob/master/leaflet/leaflet.Rmd)
+* [rgeomatic](https://rgeomatic.hypotheses.org/author/rgeomatic)

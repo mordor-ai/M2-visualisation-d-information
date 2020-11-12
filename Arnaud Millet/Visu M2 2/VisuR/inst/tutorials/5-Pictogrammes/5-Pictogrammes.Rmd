@@ -1,0 +1,65 @@
+---
+title: "Logiciel R"
+subtitle: Visualisation sur R - Pictogrammes
+author: "Arnaud MILET - arnaud.milet@d-sidd.com"
+output: 
+  learnr::tutorial:
+    css: css/style_tuto_arnaud.css
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE, warning=FALSE,message=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,warning = F,error = F)
+library(waffle)
+library(extrafont)
+```
+
+## Quelques packages nécéssaires
+
+* waffle  
+* extrafont 
+
+
+```{r waffle, exercise = TRUE, exercise.eval = FALSE}
+parts <- c(`Un-breachednUS Population`=(318-11-79), `Premera`=11, `Anthem`=79)
+waffle(parts/10, rows=3, colors=c("#969696", "#1879bf", "#009bda")) 
+```
+
+
+
+## Autres exemples  
+
+```{r autres, exercise = TRUE, exercise.eval = FALSE}
+
+pain.adult.1997 <- c(`YOY (406)`=406, `Adult (24)`=24)
+
+A <- waffle(pain.adult.1997/2, rows=7, size=0.5, 
+            colors=c("#c7d4b6", "#a3aabd"), 
+            title="Paine Run Brook Trout Abundance (1997)", 
+            xlab="1 square = 2 fish", pad=3)
+
+pine.adult.1997 <- c(`YOY (221)`=221, `Adult (143)`=143)
+
+B <- waffle(pine.adult.1997/2, rows=7, size=0.5, 
+            colors=c("#c7d4b6", "#a3aabd"), 
+            title="Piney River Brook Trout Abundance (1997)", 
+            xlab="1 square = 2 fish", pad=8)
+
+stan.adult.1997 <- c(`YOY (270)`=270, `Adult (197)`=197)
+
+C <- waffle(stan.adult.1997/2, rows=7, size=0.5, 
+            colors=c("#c7d4b6", "#a3aabd"), 
+            title="Staunton River Trout Abundance (1997)", 
+            xlab="1 square = 2 fish")
+library(gridExtra)
+grid.arrange(A, B, C,ncol=1,nrow=3)
+```
+
+
+## Pour aller plus loin:
+
+* [Package waffle](https://github.com/cran/waffle/blob/master/README.md)  
+* [R: How to Layout and Design an Infographic](https://www.r-bloggers.com/r-how-to-layout-and-design-an-infographic/) 
+* [FontAwesome](https://rstudio-pubs-static.s3.amazonaws.com/84208_a956e765fe574fa2b62b27bb8fd09576.html) 
+* [Font Awesome Free's Cheatsheet](https://fontawesome.com/cheatsheet)

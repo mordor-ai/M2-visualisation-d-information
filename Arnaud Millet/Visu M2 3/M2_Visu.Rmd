@@ -1,0 +1,88 @@
+---
+title: "M2 Visualisation d'informations sur R"
+subtitle: 'Master M2 MIASHS<br><img src="Elements/images/logo.png" alt="Master MIASHS" height="100"><br>2020-2021'
+author: 'Arnaud MILET <br> arnaud.milet@d-sidd.com'
+
+output:
+  slidy_presentation:
+    footer: "UFR 6 - Département MIAp - Visualisation d’informations"
+    includes:
+      in_header: Elements/images/entete.html
+            
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Présentation du contenu et de l'évaluation du TD/TP 
+
+### Le contenu
+
+1. ggplot2
+2. Nuage de mots avec R
+3. Quelques pictogrammes avec R
+4. Arbres et D3 sur R
+5. Cartographie et leaflet avec R
+
+***
+
+### Un package : VisuR
+
+L'ensemble des éléments du TP dont un package dédié à la formation sont disponibles sur le drive de l'Université:  
+
+**[frama.link/VisuR](frama.link/VisuR)**
+
+***
+
+### L'évaluation
+
+
+Vous serez évalués en 2 temps :  
+
+  * Une évaluation sur machine aura lieu à la fin du second TD/TP. Vous aurez 15 minutes pour répondre à une question. (1/3 de la note) :
+    * Restituer un script commenté permettant de réaliser un graphique 
+  * Une évaluation sur un travail collectif à rendre le 15 novembre avant 12h (2/3 de la note). Les groupes de 4 à 5 étudiants seront constitués par les étudiants  et restitueront un ensemble de visualisation sur un sujet de votre choix.  
+  
+    
+A travers 3 visualisations, vous choisirez d’éclairer les informations qui vous importent le plus. Vous pouvez utiliser tout ce qui a été vu au cours des heures de TD/TP/M1 (shiny par exemple). La note prendra en considération l’adéquation entre les données à analyser et le choix de représentation, la qualité de la représentation ainsi que l’apport de la visualisation à l’analyse des données.  
+
+
+## Packages nécéssaires
+
+* ggplot2
+* scales
+* tidyverse
+* cowplot
+* FactoMineR
+* factoextra
+* tm
+* SnowballC
+* wordcloud
+* RColorBrewer
+* waffle
+* extrafont
+* treemap
+* d3treeR
+* collapsibleTree
+* leaflet
+* sp
+* rgdal
+* sf
+* ...
+
+
+## Sources
+
+* http://ggplot2.tidyverse.org/reference/
+* http://r-statistics.co/ggplot2-Tutorial-With-R.html#5.%20The%20Facets
+* http://cfss.uchicago.edu/r4ds_solutions.html
+* http://www.sthda.com/french/wiki/ggplot2-combiner-plusieurs-graphiques-sur-la-m-me-page-logiciel-r-et-visualisation-de-donn-es
+* http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+* http://www.datacarpentry.org/dc_zurich/R-ecology/05-visualisation-ggplot2.html
+* http://www.sthda.com/french/articles/38-methodes-des-composantes-principales-dans-r-guide-pratique/78-classification-hierarchique-sur-composantes-principales-l-essentiel
+* http://www.sthda.com/french/wiki/ggplot2-barplots-guide-de-demarrage-rapide-logiciel-r-et-visualisation-de-donnees
+* http://www.sthda.com/french/wiki/text-mining-et-nuage-de-mots-avec-le-logiciel-r-5-etapes-simples-a-savoir
+* https://github.com/cran/waffle/blob/master/README.md
+* https://www.r-bloggers.com/r-how-to-layout-and-design-an-infographic/
+* https://rud.is/b/2015/03/26/pre-cran-waffle-update-isotype-pictograms/
