@@ -8,3 +8,4 @@ __MACOSX
 *.mp4
 *.zip
 **/.vscode/
+.DS_Store
