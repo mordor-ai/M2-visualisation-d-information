@@ -309,6 +309,24 @@
     function main() {
 
         var canvas = document.getElementById("glcanvas");
+
+
+
+
+
+        // Event handler to resize the canvas when the document view is changed
+        window.addEventListener('resize', resizeCanvas, false);
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Redraw everything after resizing the window
+            drawStuff();
+        }
+        resizeCanvas();
+
+
         // Create the Three.js renderer and attach it to our canvas
         renderer = new THREE.WebGLRenderer({
             canvas: canvas,
