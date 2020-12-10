@@ -1,6 +1,6 @@
 /**
- * @file Ce fihier contient le code permettant de faire le TP2
- * @author Emmanuel  Pellegrin <optionalEmail@example.com>
+ * @file Ce fihier contient le code permettant de faire le TP3
+ * @author Emmanuel  Pellegrin <miashs@pellegrin.me>
  * @copyright Emmanuel Pellegrin 2021 - Librement inspiré de Nancy Rodriguez(nancy.rodriguez@lirmm.fr)
  * @license Creative Commons
  */
@@ -28,7 +28,7 @@
             x: 0,
             y: 0
         },
-        INTERSECTED;
+        INTERSECTED= false;
     var labels = {
         x: ["cat1", "cat2", "cat3", "cat4", "cat5"],
         z: ["2016", "2017", "2018", "2019", "2020"]
@@ -230,7 +230,7 @@
             // if the closest object intersected is not the currently stored intersection object 
             if (intersects[0].object != INTERSECTED) {
                 // restore previous intersection object (if it exists) to its original color
-                if (INTERSECTED) {
+                if (INTERSECTED && !colorChanged) {
                     INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
                 }
                 // store reference to closest object as current intersection object
