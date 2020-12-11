@@ -20,7 +20,7 @@
     var bar = [];
     var data = [];
     // tooltip
-    var fontSizeInit = 40;
+    var fontSizeInit = 30;
     var sprite1;
     var canvas1, ctx, texture1;
     // global variables for intersections
@@ -28,12 +28,189 @@
             x: 0,
             y: 0
         },
-        INTERSECTED= false;
+        INTERSECTED = false;
     var labels = {
-        x: ["cat1", "cat2", "cat3", "cat4", "cat5"],
-        z: ["2016", "2017", "2018", "2019", "2020"]
+        x: ["Italy", "France", "Spain", "USA", "Argentina", "China"],//, "Chile", "Australia", "Germany", "South", "Portugal", "Romania", "Russian", "Hungary", "Brazil", "New", "Austria", "Greece", "Moldova", "Georgia", "Bulgaria", "Switzerland"],
+        z: ["2014", "2015", "2016", "2017","2018"]
     };
-
+    var realDatas = [{
+            2014: "44.2",
+            2015: "50.0",
+            2016: "50.9",
+            2017: "42.5",
+            2018: "48.5",
+            country: "Italy"
+        },
+        {
+            2014: "46.5",
+            2015: "47.0",
+            2016: "45.2",
+            2017: "36.6",
+            2018: "46.4",
+            country: "France"
+        },
+        {
+            2014: "39.5",
+            2015: "37.7",
+            2016: "39.7",
+            2017: "32.5",
+            2018: "40.9",
+            country: "Spain"
+        },
+        {
+            2014: "23.1",
+            2015: "21.7",
+            2016: "23.7",
+            2017: "23.3",
+            2018: "23.9",
+            country: "USA"
+        },
+        {
+            2014: "15.2",
+            2015: "13.4",
+            2016: "9.4",
+            2017: "11.8",
+            2018: "14.5",
+            country: "Argentina"
+        },
+        {
+            2014: "11.6",
+            2015: "11.5",
+            2016: "11.4",
+            2017: "10.8",
+            2018: "NA",
+            country: "China"
+        }
+        /*,
+        {
+            2014: "9.9",
+            2015: "12.9",
+            2016: "10.1",
+            2017: "9.5",
+            2018: "12.9",
+            country: "Chile"
+        },
+        {
+            2014: "11.9",
+            2015: "11.9",
+            2016: "13.1",
+            2017: "13.7",
+            2018: "12.5",
+            country: "Australia"
+        },
+        {
+            2014: "9.2",
+            2015: "8.8",
+            2016: "9.0",
+            2017: "7.5",
+            2018: "9.8",
+            country: "Germany"
+        },
+        {
+            2014: "9.5",
+            2015: "11.5",
+            2016: "11.2",
+            2017: "10.5",
+            2018: "10.8",
+            country: "South Africa"
+        },
+        {
+            2014: "6.2",
+            2015: "7.0",
+            2016: "6.0",
+            2017: "6.7",
+            2018: "5.3",
+            country: "Portugal"
+        },
+        {
+            2014: "3.7",
+            2015: "3.6",
+            2016: "3.3",
+            2017: "4.3",
+            2018: "5.2",
+            country: "Romania"
+        },
+        {
+            2014: "3.9",
+            2015: "5.1",
+            2016: "5.6",
+            2017: "5.2",
+            2018: "6.3",
+            country: "Russian Federation"
+        },
+        {
+            2014: "2.4",
+            2015: "2.6",
+            2016: "2.5",
+            2017: "2.5",
+            2018: "3.4",
+            country: "Hungary"
+        },
+        {
+            2014: "2.6",
+            2015: "2.7",
+            2016: "1.3",
+            2017: "3.6",
+            2018: "3.4",
+            country: "Brazil"
+        },
+        {
+            2014: "3.0",
+            2015: "3.2",
+            2016: "2.3",
+            2017: "3.1",
+            2018: "2.9",
+            country: "New Zealand"
+        },
+        {
+            2014: "2.0",
+            2015: "2.3",
+            2016: "2.0",
+            2017: "2.5",
+            2018: "3.0",
+            country: "Austria"
+        },
+        {
+            2014: "2.8",
+            2015: "2.5",
+            2016: "2.5",
+            2017: "2.6",
+            2018: "2.2",
+            country: "Greece"
+        },
+        {
+            2014: "1.6",
+            2015: "1.6",
+            2016: "1.5",
+            2017: "1.8",
+            2018: "2.0",
+            country: "Moldova"
+        },
+        {
+            2014: "1.2",
+            2015: "1.5",
+            2016: "1.2",
+            2017: "1.3",
+            2018: "2.0",
+            country: "Georgia"
+        },
+        {
+            2014: "0.8",
+            2015: "1.4",
+            2016: "1.2",
+            2017: "1.2",
+            2018: "1.1",
+            country: "Bulgaria"
+        },
+        {
+            2014: "0.9",
+            2015: "0.9",
+            2016: "1.1",
+            2017: "0.8",
+            2018: "1.1",
+            country: "Switzerland"
+        }*/
+    ];
 
     var inSelectionMode = false,
         selected = null,
@@ -142,16 +319,32 @@
         scene.add(plane);
     }
 
+
+
+
     function initData() {
         //var data = [];
-        var nbBarsX = 5; // number of objets for each Z 
+        
+
+        //var nbBarsX = 5; // number of objets for each Z 
+        var nbBarsX = labels.x.length;
         var startZ = -25; // position of first Z line
-        var nbZ = 5;
+        //var nbZ = 5; // number of objets for each X
+        var nbZ =labels.z.length;
+
         var espacmnt = 5;
         var z = startZ;
         for (var i = 0; i < nbZ; i += 1) {
             for (var j = 0; j < nbBarsX; j += 1) {
-                data.push([j * espacmnt, 1, z]);
+                
+                var _y = realDatas[i][labels.z[j]];
+                var _country =  realDatas[i].country;
+                //let keys = Object.keys(realDatas[i]);
+                let keys = Object.keys(realDatas[i]);
+                var _year =keys[j];// keys.filter(x=>x=="name")[0];
+                //data.push([j * espacmnt, 1, z]);
+                data.push([j * espacmnt, _y, z,_country,_year]);
+
             }
             z += espacmnt;
         }
@@ -172,7 +365,7 @@
             //geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, data[i][2]));
             var obj = new THREE.Mesh(geometry, material);
             obj.position.set(data[i][0], data[i][1], data[i][2]);
-            obj.name = "bar-" + i;
+            obj.name = `${data[i][3]},${data[i][4]}`;
             obj.castShadow = true;
             obj.receiveShadow = true;
             scene.add(obj);
@@ -182,16 +375,17 @@
         //bar[1].position.y = 5;
         // Animate Y value
         for (i = 0; i < bar.length; i++) {
-
+            console.log(data[i][1]);
             var tween = new TweenMax.to(bar[i].scale // DOM element objects we want to animate at the same time
                 , 1 // duration of animation
                 , {
                     ease: Elastic.easeOut.config(1, 1),
-                    y: Math.random() * 10,
+                    y:  data[i][1],//Math.random() * 10,
                     delay: i * 0.25,
                     onUpdate: tweenUpdate
                 });
         }
+        
         /*
         cette fonction permet d'ajuster la position des barres
         */
@@ -284,7 +478,7 @@
         });
         var sprite1 = new THREE.Sprite(spriteMaterial);
         sprite1.position.set(5, 5, 5);
-        sprite1.scale.set(10, 10, 10);
+        sprite1.scale.set(15, 15, 15);
         scene.add(sprite1);
     }
 
@@ -403,19 +597,22 @@
         createTooltip();
         findIntersections();
         createLabels();
-        createGUI();
-
-
-
-
-
-
-        // Run the run loop
+        createGUI(); // Run the run loop
         renderer.setAnimationLoop(() => { // tells the browser we want to perform an animation
 
             render();
 
         });
+
+
+
+
+
+
+
+
+
+
     }
 
     main();
