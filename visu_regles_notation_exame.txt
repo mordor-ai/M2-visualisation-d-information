@@ -1,0 +1,6 @@
+* Questions visu jeudi : 3 pts
+* Questions prog. graphique jeudi : 2 pts => NancyR
+* Exercices description/conception jeudi : 5 pts
+* Exercice prog. D3 jeudi : 2 pts
+* TP notés A. Milet : 4 pts 
+* TP notés NR : 4 pts
