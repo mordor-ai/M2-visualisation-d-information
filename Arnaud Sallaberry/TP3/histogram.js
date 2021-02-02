@@ -30,9 +30,11 @@ function updateHistX(att){
 		return d[attHist];
 	})]);
 	gxAxisHist.transition().call(xAxisHist);
-	var nothingSelected = dataHist.filter(selected=> selected==true).length ;
-	console.log(dataHist);
-	console.log(dataHist.filter(selected=> selected==true));
+	var nothingSelected = dataHist.filter(function(el){
+		return el.selected==true}).length ;
+	console.log(dataHist.filter(function(el){
+		return el.selected==true}));
+	console.log(nothingSelected);
 	var maxdensity = 0;
 	for(i=0 ; i<nbClasses ; i++){
 		classes[i].absfrequency = 0;
@@ -102,7 +104,8 @@ function initHistogram(svg, w, h, d, a){
 	}
 
 	var maxdensity = 0;
-	var nothingSelected = dataHist.filter(selected=> selected==true).length;
+	var nothingSelected = dataHist.filter(function(el){
+		return el.selected==true}).length ;
 
 	for(i=0 ; i<nbClasses ; i++){
 		classes[i].absfrequency = 0;
